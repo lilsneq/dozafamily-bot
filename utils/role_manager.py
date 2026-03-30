@@ -5,6 +5,7 @@ from config.settings import (
     ACCEPTED_ROLE_1_ID,
     ACCEPTED_ROLE_2_ID
 )
+# from models.application_modal import
 
 
 async def set_applicant_nickname(member, full_name: str, ooc_name: str):
@@ -62,3 +63,7 @@ async def remove_applicant_role(member):
 async def setup_new_member(member):
     """Настройка нового участника"""
     await give_applicant_role(member)
+
+
+
+

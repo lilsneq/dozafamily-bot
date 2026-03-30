@@ -7,7 +7,7 @@ from utils.logger import send_log
 from utils.role_manager import set_applicant_nickname, give_applicant_role
 
 
-class FamilyApplicationModal(discord.ui.Modal, title='Заявка в семью'):
+class FamilyApplicationModal(discord.ui.Modal, title='Форма заявки'):
     """Модальное окно для заявки в семью"""
     
     full_name = discord.ui.TextInput(
@@ -30,7 +30,7 @@ class FamilyApplicationModal(discord.ui.Modal, title='Заявка в семью
         placeholder='Расскажите, чем вы можете помочь семье...',
         required=True,
         max_length=1000,
-        min_length=10
+        min_length=1
     )
     
     ooc_name = discord.ui.TextInput(
@@ -38,6 +38,13 @@ class FamilyApplicationModal(discord.ui.Modal, title='Заявка в семью
         placeholder='Введите ваше OOC имя...',
         required=True,
         max_length=100
+    )
+
+    age_user = discord.ui.TextInput(
+        label='Сколько лет?',
+        placeholder='Например 16 и больше',
+        required=True,
+        max_length=2
     )
 
 
@@ -52,6 +59,7 @@ class FamilyApplicationModal(discord.ui.Modal, title='Заявка в семью
             'passport': self.passport.value,
             'usefulness': self.usefulness.value,
             'ooc_name': self.ooc_name.value,
+            'age_user': self.age_user.value,
             'status': 'pending',
             'timestamp': datetime.utcnow().isoformat()
         }
@@ -64,6 +72,7 @@ class FamilyApplicationModal(discord.ui.Modal, title='Заявка в семью
             timestamp=datetime.utcnow()
         )
         embed.add_field(name='👤 Имя и Фамилия', value=self.full_name.value, inline=False)
+        embed.add_field(name='Ваш возраст', value=self.age_user.value, inline=False)
         embed.add_field(name='🆔 Номер паспорта', value=self.passport.value, inline=False)
         embed.add_field(name='💼 Чем будет полезен', value=self.usefulness.value, inline=False)
         embed.add_field(name='🎮 OOC Имя', value=self.ooc_name.value, inline=False)
@@ -91,7 +100,7 @@ class FamilyApplicationModal(discord.ui.Modal, title='Заявка в семью
 
         # Выдача роли заявителя
         await give_applicant_role(interaction.user)
-        
+
         # Лог
         await send_log(
             interaction.guild,

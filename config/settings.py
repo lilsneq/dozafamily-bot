@@ -20,5 +20,9 @@ APPLICANT_ROLE_ID = 1236152539968438312       # Роль для подающих
 ACCEPTED_ROLE_1_ID = 1236152539968438312      # Первая роль принятых
 ACCEPTED_ROLE_2_ID = 1471969251018412053      # Вторая роль принятых
 
+
+
+
+
 # Файл хранения заявок
 APPLICATIONS_FILE = 'data/applications.json'
