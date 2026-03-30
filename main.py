@@ -22,6 +22,7 @@ if not os.environ.get('PYTHONHTTPSVERIFY', '') and getattr(ssl, '_create_unverif
 
 
 
+
 def main():
     """Главная функция запуска бота"""
     
