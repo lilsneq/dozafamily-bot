@@ -16,7 +16,7 @@ class RulesButton(discord.ui.View):
     @classmethod
     async def send_rules(cls, interaction_or_ctx):
         """Метод для удобной отправки сообщения с картинкой и этой кнопкой"""
-        url = 'https://i.pinimg.com/1200x/d4/c9/cb/d4c9cbbd34bcb79302cfcd18a5f641fd.jpg'
+        url = 'https://discordapp.com'
 
         embed = discord.Embed(
             title="Правила сервера",
