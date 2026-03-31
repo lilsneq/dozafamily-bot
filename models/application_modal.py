@@ -5,6 +5,7 @@ from config.settings import APPLICATION_CHANNEL_ID, STATIC_CHANNEL_ID
 from utils.storage import get_next_app_id, add_application
 from utils.logger import send_log
 from utils.role_manager import set_applicant_nickname, give_applicant_role
+from models.application_button import ApplicationReviewView
 
 
 class FamilyApplicationModal(discord.ui.Modal, title='Форма заявки'):
