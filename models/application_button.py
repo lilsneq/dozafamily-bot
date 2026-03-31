@@ -23,14 +23,14 @@ class ApplicationReviewView(discord.ui.View):
     """Кнопки под заявкой в админ-канале"""
 
     def __init__(self, applicant: discord.Member, app_id: int):
-        super().__init__(timeout=None)  # Кнопки будут работать даже после перезагрузки бота
+        super().__init__(timeout=None)
         self.applicant = applicant
         self.app_id = app_id
 
     @discord.ui.button(label="Принять", style=discord.ButtonStyle.green, custom_id="approve_btn")
     async def approve(self, interaction: discord.Interaction, button: discord.ui.Button):
         # Логика принятия
-        from utils.role_manager import give_accepted_roles  # Импорт внутри, чтобы избежать циклов
+        from utils.role_manager import give_accepted_roles
 
         success = await give_accepted_roles(self.applicant)
         if success:
@@ -38,7 +38,7 @@ class ApplicationReviewView(discord.ui.View):
             # Отключаем кнопки после нажатия
             self.stop()
             await interaction.message.edit(view=None)
-            # Можно отправить ЛС пользователю
+            #ЛС пользователю
             await self.applicant.send(f"🎉 Ваша заявка #{self.app_id} в семью была одобрена!")
         else:
             await interaction.response.send_message("❌ Ошибка при выдаче ролей. Проверьте права бота.", ephemeral=True)
