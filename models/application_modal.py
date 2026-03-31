@@ -5,7 +5,6 @@ from config.settings import APPLICATION_CHANNEL_ID, STATIC_CHANNEL_ID
 from utils.storage import get_next_app_id, add_application
 from utils.logger import send_log
 from utils.role_manager import set_applicant_nickname, give_applicant_role
-from models.application_button import ApplicationReviewView
 
 
 class FamilyApplicationModal(discord.ui.Modal, title='Форма заявки'):
@@ -49,10 +48,14 @@ class FamilyApplicationModal(discord.ui.Modal, title='Форма заявки'):
     )
 
 
-
-
-
     async def on_submit(self, interaction: discord.Interaction):
+        await interaction.response.send_message(
+            f'✅ Ваша заявка принята! Ожидайте рассмотрения.',
+            ephemeral=True
+        )
+
+        from models.application_button import ApplicationReviewView
+
         app_id = get_next_app_id()
 
         # Сохранение заявки
