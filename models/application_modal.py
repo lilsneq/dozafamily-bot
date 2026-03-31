@@ -81,17 +81,10 @@ class FamilyApplicationModal(discord.ui.Modal, title='Форма заявки'):
         max_length=3
     )
 
-    where_find_family = discord.ui.TextInput(
-        label='Откуда узнали про Фаму?',
-        placeholder='Не обязательно',
-        required=False,
-        max_length=300
-    )
 
 
     async def on_submit(self, interaction: discord.Interaction):
         app_id = get_next_app_id()
-        find_source = self.where_find_family.value if self.where_find_family.value else "Не указано"
 
         # Сохранение заявки
         app_data = {
@@ -102,7 +95,6 @@ class FamilyApplicationModal(discord.ui.Modal, title='Форма заявки'):
             'usefulness': self.usefulness.value,
             'ooc_name': self.ooc_name.value,
             'age_user': self.age_user.value,
-            'where_find_family': self.find_source,
             'status': 'pending',
             'timestamp': datetime.utcnow().isoformat()
         }
@@ -119,7 +111,6 @@ class FamilyApplicationModal(discord.ui.Modal, title='Форма заявки'):
         embed.add_field(name='🆔 Номер паспорта', value=self.passport.value, inline=False)
         embed.add_field(name='💼 Чем будет полезен', value=self.usefulness.value, inline=False)
         embed.add_field(name='🎮 OOC Имя', value=self.ooc_name.value, inline=False)
-        embed.add_field(name='Откуда Узнали про Фаму', value=find_source, inline=False)
         embed.set_footer(text=f'Заявка от {interaction.user.name}', icon_url=interaction.user.display_avatar.url)
         
         static_id = interaction.guild.get_channel(STATIC_CHANNEL_ID)
