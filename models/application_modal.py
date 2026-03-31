@@ -50,7 +50,14 @@ class FamilyApplicationModal(discord.ui.Modal, title='Форма заявки'):
         required=True,
         max_length=100
     )
-    
+
+    age_user = discord.ui.TextInput(
+        label='Сколько лет?',
+        placeholder='Например 16 и больше',
+        required=True,
+        max_length=3
+    )
+
     passport = discord.ui.TextInput(
         label='Номер паспорта(Static)',
         placeholder='Введите номер паспорта...',
@@ -62,7 +69,7 @@ class FamilyApplicationModal(discord.ui.Modal, title='Форма заявки'):
         label='Чем будете полезны в семье?',
         style=discord.TextStyle.paragraph,
         placeholder='Расскажите, чем вы можете помочь семье...',
-        required=True,
+        required=False,
         max_length=1000,
         min_length=1
     )
@@ -74,12 +81,7 @@ class FamilyApplicationModal(discord.ui.Modal, title='Форма заявки'):
         max_length=100
     )
 
-    age_user = discord.ui.TextInput(
-        label='Сколько лет?',
-        placeholder='Например 16 и больше',
-        required=True,
-        max_length=3
-    )
+
 
 
 
