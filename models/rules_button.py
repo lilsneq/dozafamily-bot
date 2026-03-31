@@ -7,7 +7,6 @@ class RulesButton(discord.ui.View):
 
     def __init__(self):
         super().__init__(timeout=None)
-        # Добавляем кнопку-ссылку прямо при инициализации
         self.add_item(discord.ui.Button(
             label='Просмотреть правила сервера',
             style=discord.ButtonStyle.link,
@@ -19,15 +18,13 @@ class RulesButton(discord.ui.View):
         """Метод для удобной отправки сообщения с картинкой и этой кнопкой"""
         url = 'https://i.pinimg.com/1200x/d4/c9/cb/d4c9cbbd34bcb79302cfcd18a5f641fd.jpg'
 
-        # Создаем Embed, чтобы картинка была видна в Discord
         embed = discord.Embed(
             title="Правила сервера",
             description="Пожалуйста, ознакомьтесь с правилами нашего сообщества:",
             color=discord.Color.blue()
         )
-        embed.set_image(url=url)  # Это вставит картинку в само сообщение
+        embed.set_image(url=url)
 
-        # Отправляем сообщение с созданным Embed и самой кнопкой (view)
         if isinstance(interaction_or_ctx, discord.Interaction):
             await interaction_or_ctx.response.send_message(embed=embed, view=cls())
         else:
