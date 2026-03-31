@@ -7,6 +7,40 @@ from utils.logger import send_log
 from utils.role_manager import set_applicant_nickname, give_applicant_role
 
 
+class ApplicationReviewView(discord.ui.View):
+    """Кнопки под заявкой в админ-канале"""
+
+    def __init__(self, applicant: discord.Member, app_id: int):
+        super().__init__(timeout=None)  # Кнопки будут работать даже после перезагрузки бота
+        self.applicant = applicant
+        self.app_id = app_id
+
+    @discord.ui.button(label="Принять", style=discord.ButtonStyle.green, custom_id="approve_btn")
+    async def approve(self, interaction: discord.Interaction, button: discord.ui.Button):
+        # Логика принятия
+        from utils.role_manager import give_accepted_roles  # Импорт внутри, чтобы избежать циклов
+
+        success = await give_accepted_roles(self.applicant)
+        if success:
+            await interaction.response.send_message(f"✅ Заявка #{self.app_id} одобрена. Роли выданы.", ephemeral=True)
+            # Отключаем кнопки после нажатия
+            self.stop()
+            await interaction.message.edit(view=None)
+            # Можно отправить ЛС пользователю
+            await self.applicant.send(f"🎉 Ваша заявка #{self.app_id} в семью была одобрена!")
+        else:
+            await interaction.response.send_message("❌ Ошибка при выдаче ролей. Проверьте права бота.", ephemeral=True)
+
+    @discord.ui.button(label="Отклонить", style=discord.ButtonStyle.red, custom_id="deny_btn")
+    async def deny(self, interaction: discord.Interaction, button: discord.ui.Button):
+        # Логика отклонения
+        await interaction.response.send_message(f"❌ Заявка #{self.app_id} отклонена.", ephemeral=True)
+        self.stop()
+        await interaction.message.edit(view=None)
+        await self.applicant.send(f"😔 К сожалению, ваша заявка #{self.app_id} в семью была отклонена.")
+
+
+
 class FamilyApplicationModal(discord.ui.Modal, title='Форма заявки'):
     """Модальное окно для заявки в семью"""
     
@@ -44,7 +78,7 @@ class FamilyApplicationModal(discord.ui.Modal, title='Форма заявки'):
         label='Сколько лет?',
         placeholder='Например 16 и больше',
         required=True,
-        max_length=2
+        max_length=3
     )
 
     where_find_family = discord.ui.TextInput(
@@ -57,7 +91,8 @@ class FamilyApplicationModal(discord.ui.Modal, title='Форма заявки'):
 
     async def on_submit(self, interaction: discord.Interaction):
         app_id = get_next_app_id()
-        
+        find_source = self.where_find_family.value if self.where_find_family.value else "Не указано"
+
         # Сохранение заявки
         app_data = {
             'id': app_id,
@@ -67,7 +102,7 @@ class FamilyApplicationModal(discord.ui.Modal, title='Форма заявки'):
             'usefulness': self.usefulness.value,
             'ooc_name': self.ooc_name.value,
             'age_user': self.age_user.value,
-            'where_find_family': self.where_find_family.value,
+            'where_find_family': self.find_source,
             'status': 'pending',
             'timestamp': datetime.utcnow().isoformat()
         }
@@ -84,7 +119,7 @@ class FamilyApplicationModal(discord.ui.Modal, title='Форма заявки'):
         embed.add_field(name='🆔 Номер паспорта', value=self.passport.value, inline=False)
         embed.add_field(name='💼 Чем будет полезен', value=self.usefulness.value, inline=False)
         embed.add_field(name='🎮 OOC Имя', value=self.ooc_name.value, inline=False)
-        embed.add_field(name='Откуда Узнали про Фаму',value=self.where_find_family.value, inline=False)
+        embed.add_field(name='Откуда Узнали про Фаму', value=find_source, inline=False)
         embed.set_footer(text=f'Заявка от {interaction.user.name}', icon_url=interaction.user.display_avatar.url)
         
         static_id = interaction.guild.get_channel(STATIC_CHANNEL_ID)
@@ -96,11 +131,13 @@ class FamilyApplicationModal(discord.ui.Modal, title='Форма заявки'):
         # Отправка в канал заявок
         app_channel = interaction.guild.get_channel(APPLICATION_CHANNEL_ID)
         if app_channel:
+            view = ApplicationReviewView(applicant=interaction.user, app_id=app_id)
             await app_channel.send(
                 content=f'{interaction.user.mention} подал заявку в семью!',
-                embed=embed
+                embed=embed,
+                view=view
             )
-        
+
         # Ответ пользователю
         await interaction.response.send_message(
             f'✅ Ваша заявка #{app_id} успешно отправлена! Ожидайте рассмотрения.',
@@ -116,3 +153,5 @@ class FamilyApplicationModal(discord.ui.Modal, title='Форма заявки'):
             f'📋 **Новая заявка #{app_id}**\nПользователь: {interaction.user.mention} ({interaction.user.id})\nИмя: {self.full_name.value}\nOOC: {self.ooc_name.value}\nНикнейм изменен на: {self.full_name.value} | {self.ooc_name.value}',
             discord.Color.gold()
         )
+
+
