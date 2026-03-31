@@ -9,9 +9,9 @@ class RulesButton(discord.ui.View):
         super().__init__(timeout=None)
         # Добавляем кнопку-ссылку прямо при инициализации
         self.add_item(discord.ui.Button(
-            label='Открыть оригинал',
+            label='Просмотреть правила сервера',
             style=discord.ButtonStyle.link,
-            url='https://i.pinimg.com/1200x/d4/c9/cb/d4c9cbbd34bcb79302cfcd18a5f641fd.jpg'
+            url='https://docs.google.com/document/d/1eZWV6J8NwFgPeK_vhD6woovznuvxj10Gwcv6-QmnNow/edit?tab=t.0'
         ))
 
     @classmethod
