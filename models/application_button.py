@@ -18,6 +18,7 @@ class ApplicationButton(discord.ui.View):
         await interaction.response.send_modal(FamilyApplicationModal())
 
 
+
 class ApplicationReviewView(discord.ui.View):
     """Кнопки под заявкой в админ-канале"""
 
