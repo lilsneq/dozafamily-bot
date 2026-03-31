@@ -7,40 +7,6 @@ from utils.logger import send_log
 from utils.role_manager import set_applicant_nickname, give_applicant_role
 
 
-class ApplicationReviewView(discord.ui.View):
-    """Кнопки под заявкой в админ-канале"""
-
-    def __init__(self, applicant: discord.Member, app_id: int):
-        super().__init__(timeout=None)  # Кнопки будут работать даже после перезагрузки бота
-        self.applicant = applicant
-        self.app_id = app_id
-
-    @discord.ui.button(label="Принять", style=discord.ButtonStyle.green, custom_id="approve_btn")
-    async def approve(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # Логика принятия
-        from utils.role_manager import give_accepted_roles  # Импорт внутри, чтобы избежать циклов
-
-        success = await give_accepted_roles(self.applicant)
-        if success:
-            await interaction.response.send_message(f"✅ Заявка #{self.app_id} одобрена. Роли выданы.", ephemeral=True)
-            # Отключаем кнопки после нажатия
-            self.stop()
-            await interaction.message.edit(view=None)
-            # Можно отправить ЛС пользователю
-            await self.applicant.send(f"🎉 Ваша заявка #{self.app_id} в семью была одобрена!")
-        else:
-            await interaction.response.send_message("❌ Ошибка при выдаче ролей. Проверьте права бота.", ephemeral=True)
-
-    @discord.ui.button(label="Отклонить", style=discord.ButtonStyle.red, custom_id="deny_btn")
-    async def deny(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # Логика отклонения
-        await interaction.response.send_message(f"❌ Заявка #{self.app_id} отклонена.", ephemeral=True)
-        self.stop()
-        await interaction.message.edit(view=None)
-        await self.applicant.send(f"😔 К сожалению, ваша заявка #{self.app_id} в семью была отклонена.")
-
-
-
 class FamilyApplicationModal(discord.ui.Modal, title='Форма заявки'):
     """Модальное окно для заявки в семью"""
     
