@@ -1,7 +1,6 @@
 """Кнопки для правил сервера с большим изображением"""
 import discord
 
-
 class RulesButton(discord.ui.View):
     """Класс для отображения правил с кнопкой-ссылкой"""
 
@@ -15,19 +14,24 @@ class RulesButton(discord.ui.View):
 
     @classmethod
     async def send_rules(cls, interaction_or_ctx):
-        """Метод для удобной отправки сообщения с картинкой и этой кнопкой"""
-        url = 'https://discordapp.com'
+        """Метод для удобной отправки сообщения с локальной картинкой и кнопкой"""
+
+        # 1. Создаем объект файла из папки assets
+        # Убедитесь, что файл называется именно rules.png
+        file = discord.File("assets/rules.jpg", filename="rules.jpg")
 
         embed = discord.Embed(
             title="Правила сервера",
             description="Пожалуйста, ознакомьтесь с правилами нашего сообщества:",
             color=discord.Color.blue()
         )
-        embed.set_image(url=url)
 
+        # 2. Привязываем картинку к эмбеду через название файла
+        embed.set_image(url="attachment://rules.jpg")
+
+        # 3. Отправляем и файл, и эмбед вместе
         if isinstance(interaction_or_ctx, discord.Interaction):
-            await interaction_or_ctx.response.send_message(embed=embed, view=cls())
+            await interaction_or_ctx.response.send_message(file=file, embed=embed, view=cls())
         else:
-            await interaction_or_ctx.send(embed=embed, view=cls())
-
+            await interaction_or_ctx.send(file=file, embed=embed, view=cls())
 

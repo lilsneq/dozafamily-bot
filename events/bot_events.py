@@ -11,20 +11,20 @@ from utils.logger import send_log
 
 def setup_bot_events(bot):
     """Настройка событий бота"""
-    
+
     @bot.event
     async def on_ready():
         """Событие при запуске бота"""
         load_applications()
         print(f'Бот запущен как {bot.user}')
-        
+
         # Синхронизация команд
         try:
             synced = await bot.tree.sync()
             print(f'Синхронизировано {len(synced)} команд')
         except Exception as e:
             print(f'Ошибка синхронизации команд: {e}')
-        
+
         # Автоматическая очистка канала панели и создание новой панели
         for guild in bot.guilds:
             try:
@@ -38,11 +38,11 @@ def setup_bot_events(bot):
                             deleted += 1
                         except Exception as e:
                             print(f'Не удалось удалить сообщение: {e}')
-                    
+
                     print(f'Удалено {deleted} сообщений из канала панели')
-                    
+
                     # Создание новой панели заявок
-                    embed = discord.Embed(
+                    family_embed = discord.Embed(
                         title='🏠 Заявка в семью',
                         description='Нажмите на кнопку ниже, чтобы подать заявку на вступление в семью.\n\n'
                                     '**Требования:**\n'
@@ -51,12 +51,16 @@ def setup_bot_events(bot):
                                     '• Дождитесь рассмотрения заявки',
                         color=discord.Color.blue()
                     )
-                    embed.set_thumbnail(url=guild.icon.url if guild.icon else None)
-                    
+                    file = discord.File("assets/afk.jpg", filename="afk.jpg")
+
+                    family_embed.set_image(url="attachment://afk.jpg")
+
+                    family_embed.set_thumbnail(url=guild.icon.url if guild.icon else None)
+
                     view = ApplicationButton()
-                    await panel_channel.send(embed=embed, view=view)
+                    await panel_channel.send(embed=family_embed, view=view)
                     print(f'Панель заявок создана в канале {panel_channel.name}')
-                    
+
                     # Лог о создании панели
                     await send_log(
                         guild,
@@ -84,18 +88,19 @@ def setup_bot_events(bot):
 
                     # Создание новой панели заявок
                     afk_embed = discord.Embed(
-                        title='🏠 inactive',
-                        description='Нажмите на кнопку ниже, чтобы подать заявку на inactive.\n\n'
-                                    '**Требования:**\n'
-                                    '• Заполните все поля \n'
-                                    '• Дождитесь рассмотрения заявки',
+                        title='🏠 Inactive',
+                        description='Нажмите на кнопку ниже, чтобы подать заявку на inactive.',
                         color=discord.Color.blue()
                     )
 
+                    file = discord.File("assets/rules.jpg", filename="rules.jpg")
+
+                    afk_embed.set_image(url="attachment://rules.jpg")
                     afk_embed.set_thumbnail(url=guild.icon.url if guild.icon else None)
 
                     view = AFKApplicationButton()
-                    await afk_channel.send(embed=afk_embed, view=view)
+
+                    await afk_channel.send(file=file, embed=afk_embed, view=view)
                     print(f'Панель AFK создана в канале {afk_channel.name}')
 
                     # Лог о создании панели
@@ -108,21 +113,19 @@ def setup_bot_events(bot):
                 print(f'Ошибка при работе с каналом панели: {e}')
 
 
-
             # Отправка эмбеда с правилами
             try:
+                print('Панель правил запущен')
                 rules_channel = guild.get_channel(RULES_CHANNEL_ID)
                 if rules_channel:
-                    embed = discord.Embed(
-                        
-                    )
-                    embed.set_image(url="http://talori.pis-pis.ru/img/yznat.png")
-                    view = RulesButton()
-                    await rules_channel.send(embed=embed, view=view)
-                    print(f'Эмбед с правилами отправлен в канал {rules_channel.name}')
-            except Exception as e:
-                print(f'Ошибка при отправке эмбеда с правилами: {e}')
+                    await rules_channel.purge()
 
+                    from models.rules_button import RulesButton
+                    await RulesButton.send_rules(rules_channel)
+
+                    print(f'Эмбед с правилами (локальное фото) отправлен в {rules_channel.name}')
+            except Exception as e:
+                print(f'Ошибка при отправке правил: {e}')
 
 
         # Логирование запуска

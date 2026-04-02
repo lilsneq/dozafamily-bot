@@ -191,7 +191,6 @@ class AFKApplicationReviewView(discord.ui.Modal, title='Форма заявки 
         # Отправка в канал заявок
         app_channel = interaction.guild.get_channel(AFK_PANEL_CHANNEL_ID)
         if app_channel:
-            # ЗДЕСЬ УКАЗЫВАЕМ is_afk=True
             view = ApplicationReviewView(applicant=interaction.user, app_id=app_id, is_afk=True)
 
             await app_channel.send(
