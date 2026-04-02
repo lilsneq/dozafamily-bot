@@ -94,7 +94,9 @@ class FamilyApplicationModal(discord.ui.Modal, title='Форма заявки'):
         # Отправка в канал заявок
         app_channel = interaction.guild.get_channel(APPLICATION_CHANNEL_ID)
         if app_channel:
-            view = ApplicationReviewView(applicant=interaction.user, app_id=app_id)
+            # ДОБАВЛЯЕМ ПАРАМЕТР is_afk=False
+            view = ApplicationReviewView(applicant=interaction.user, app_id=app_id, is_afk=False)
+
             await app_channel.send(
                 content=f'{interaction.user.mention} подал заявку в семью!',
                 embed=embed,
@@ -189,9 +191,11 @@ class AFKApplicationReviewView(discord.ui.Modal, title='Форма заявки 
         # Отправка в канал заявок
         app_channel = interaction.guild.get_channel(AFK_PANEL_CHANNEL_ID)
         if app_channel:
-            view = ApplicationReviewView(applicant=interaction.user, app_id=app_id)
+            # ЗДЕСЬ УКАЗЫВАЕМ is_afk=True
+            view = ApplicationReviewView(applicant=interaction.user, app_id=app_id, is_afk=True)
+
             await app_channel.send(
-                content=f'{interaction.user.mention} подал заявку на AFK!',
+                content=f'📢 {interaction.user.mention} подал заявку на **Inactive**!',
                 embed=embed,
                 view=view
             )

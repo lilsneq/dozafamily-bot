@@ -34,33 +34,48 @@ class AFKApplicationButton(discord.ui.View):
 
 
 class ApplicationReviewView(discord.ui.View):
-    """Кнопки под заявкой в админ-канале"""
+    """Кнопки под заявкой в админ-канале (Общие для всех типов)"""
 
-    def __init__(self, applicant: discord.Member, app_id: int):
+    def __init__(self, applicant: discord.Member, app_id: int, is_afk: bool = False):
         super().__init__(timeout=None)
         self.applicant = applicant
         self.app_id = app_id
+        self.is_afk = is_afk  # Флаг: AFK это или обычная заявка
 
     @discord.ui.button(label="Принять", style=discord.ButtonStyle.green, custom_id="approve_btn")
     async def approve(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # Логика принятия
-        from utils.role_manager import give_accepted_roles
+        from utils.role_manager import give_accepted_roles, give_afk_role
 
-        success = await give_accepted_roles(self.applicant)
+        # Выбираем, какую функцию выдачи ролей вызвать
+        if self.is_afk:
+            success = await give_afk_role(self.applicant)
+            msg_text = f"✅ AFK-заявка #{self.app_id} одобрена. Роль AFK выдана."
+            dm_text = f"🎉 Ваш запрос на AFK #{self.app_id} был одобрен!"
+        else:
+            success = await give_accepted_roles(self.applicant)
+            msg_text = f"✅ Заявка #{self.app_id} одобрена. Роли семьи выданы."
+            dm_text = f"🎉 Ваша заявка #{self.app_id} в семью была одобрена!"
+
         if success:
-            await interaction.response.send_message(f"✅ Заявка #{self.app_id} одобрена. Роли выданы.", ephemeral=True)
-            # Отключаем кнопки после нажатия
+            await interaction.response.send_message(msg_text, ephemeral=True)
             self.stop()
             await interaction.message.edit(view=None)
-            #ЛС пользователю
-            await self.applicant.send(f"🎉 Ваша заявка #{self.app_id} в семью была одобрена!")
+            try:
+                await self.applicant.send(dm_text)
+            except:
+                pass
         else:
             await interaction.response.send_message("❌ Ошибка при выдаче ролей. Проверьте права бота.", ephemeral=True)
 
     @discord.ui.button(label="Отклонить", style=discord.ButtonStyle.red, custom_id="deny_btn")
     async def deny(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # Логика отклонения
+        subject = "на AFK" if self.is_afk else "в семью"
+
         await interaction.response.send_message(f"❌ Заявка #{self.app_id} отклонена.", ephemeral=True)
         self.stop()
         await interaction.message.edit(view=None)
-        await self.applicant.send(f"😔 К сожалению, ваша заявка #{self.app_id} в семью была отклонена.")
+
+        try:
+            await self.applicant.send(f"😔 К сожалению, ваша заявка #{self.app_id} {subject} была отклонена.")
+        except:
+            pass
