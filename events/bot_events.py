@@ -51,14 +51,16 @@ def setup_bot_events(bot):
                                     '• Дождитесь рассмотрения заявки',
                         color=discord.Color.blue()
                     )
-                    file = discord.File("assets/afk.jpg", filename="afk.jpg")
 
-                    family_embed.set_image(url="attachment://afk.jpg")
-
+                    #фотки у сообщения
+                    file = discord.File("assets/rules.jpg", filename="rules.jpg")
+                    family_embed.set_image(url="attachment://rules.jpg")
                     family_embed.set_thumbnail(url=guild.icon.url if guild.icon else None)
 
                     view = ApplicationButton()
-                    await panel_channel.send(embed=family_embed, view=view)
+
+                    await panel_channel.send(file=file, embed=family_embed, view=view)
+
                     print(f'Панель заявок создана в канале {panel_channel.name}')
 
                     # Лог о создании панели
