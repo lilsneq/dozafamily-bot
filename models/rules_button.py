@@ -6,18 +6,26 @@ class RulesButton(discord.ui.View):
 
     def __init__(self):
         super().__init__(timeout=None)
-        self.add_item(discord.ui.Button(
-            label='Просмотреть правила сервера',
-            style=discord.ButtonStyle.link,
-            url='https://docs.google.com/document/d/1eZWV6J8NwFgPeK_vhD6woovznuvxj10Gwcv6-QmnNow/edit?tab=t.0'
-        ))
+
+    @discord.ui.button(label='Просмотреть правила сервера', style=discord.ButtonStyle.primary,
+                       custom_id="view_rules_btn")
+    async def view_rules(self, interaction: discord.Interaction, button: discord.ui.Button):
+        """Здесь вы пишете текст ваших правил"""
+        rules_text = (
+            "📜 **ПРАВИЛА НАШЕГО СЕРВЕРА**\n\n"
+            "1. Ваш текст правила здесь...\n"
+            "2. Еще одно правило...\n"
+            "3. И так далее...\n\n"
+            "Желаем приятной игры!"
+        )
+
+        # Отправляем правила только нажавшему (ephemeral=True)
+        await interaction.response.send_message(rules_text, ephemeral=True)
 
     @classmethod
     async def send_rules(cls, interaction_or_ctx):
         """Метод для удобной отправки сообщения с локальной картинкой и кнопкой"""
 
-        # 1. Создаем объект файла из папки assets
-        # Убедитесь, что файл называется именно rules.png
         file = discord.File("assets/rules.jpg", filename="rules.jpg")
 
         embed = discord.Embed(
