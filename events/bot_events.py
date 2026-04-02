@@ -1,7 +1,9 @@
 """События бота"""
+import asyncio
+
 import discord
-from config.settings import PANEL_CHANNEL_ID, RULES_CHANNEL_ID
-from models.application_button import ApplicationButton
+from config.settings import PANEL_CHANNEL_ID, RULES_CHANNEL_ID, AFK_CHANNEL_ID
+from models.application_button import ApplicationButton, AFKApplicationButton
 from models.rules_button import RulesButton
 from utils.storage import load_applications
 from utils.logger import send_log
@@ -64,6 +66,49 @@ def setup_bot_events(bot):
             except Exception as e:
                 print(f'Ошибка при работе с каналом панели: {e}')
 
+        #afk эмбед и очиска канала
+        for g in bot.guilds:
+            try:
+                afk_channel = g.get_channel(AFK_CHANNEL_ID)
+                if afk_channel:
+                    # Удаление всех сообщений в канале
+                    deleted = 0
+                    async for message in afk_channel.history(limit=None):
+                        try:
+                            await message.delete()
+                            deleted += 1
+                        except Exception as e:
+                            print(f'Не удалось удалить сообщение: {e}')
+
+                    print(f'Удалено {deleted} сообщений из канала AFK')
+
+                    # Создание новой панели заявок
+                    afk_embed = discord.Embed(
+                        title='🏠 inactive',
+                        description='Нажмите на кнопку ниже, чтобы подать заявку на inactive.\n\n'
+                                    '**Требования:**\n'
+                                    '• Заполните все поля \n'
+                                    '• Дождитесь рассмотрения заявки',
+                        color=discord.Color.blue()
+                    )
+
+                    afk_embed.set_thumbnail(url=guild.icon.url if guild.icon else None)
+
+                    view = AFKApplicationButton()
+                    await afk_channel.send(embed=afk_embed, view=view)
+                    print(f'Панель AFK создана в канале {afk_channel.name}')
+
+                    # Лог о создании панели
+                    await send_log(
+                        guild,
+                        f'🔧 **Панель AFK автоматически создана**\nМодератор: Автоматически\nКанал: {afk_channel.mention}',
+                        discord.Color.blue()
+                    )
+            except Exception as e:
+                print(f'Ошибка при работе с каналом панели: {e}')
+
+
+
             # Отправка эмбеда с правилами
             try:
                 rules_channel = guild.get_channel(RULES_CHANNEL_ID)
@@ -77,7 +122,9 @@ def setup_bot_events(bot):
                     print(f'Эмбед с правилами отправлен в канал {rules_channel.name}')
             except Exception as e:
                 print(f'Ошибка при отправке эмбеда с правилами: {e}')
-        
+
+
+
         # Логирование запуска
         for guild in bot.guilds:
             await send_log(
@@ -85,3 +132,5 @@ def setup_bot_events(bot):
                 f'✅ **Бот запущен**\nБот {bot.user.mention} успешно запущен и готов к работе!',
                 discord.Color.green()
             )
+
+

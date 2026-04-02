@@ -3,7 +3,9 @@ import discord
 from config.settings import (
     APPLICANT_ROLE_ID,
     ACCEPTED_ROLE_1_ID,
-    ACCEPTED_ROLE_2_ID
+    ACCEPTED_ROLE_2_ID,
+    AFK_ROLE_ID
+
 )
 # from models.application_modal import
 
@@ -17,6 +19,18 @@ async def set_applicant_nickname(member, full_name: str, ooc_name: str):
     except Exception as e:
         print(f"Ошибка при изменении никнейма: {e}")
         return False
+
+
+async def give_afk_role(member):
+    """Выдаь роль АФК"""
+    try:
+        role = member.guild.get_role(AFK_ROLE_ID)
+        if role:
+            await member.add_roles(role)
+            return True
+    except Exception as e:
+        print(f"Ошибка при выдаче роли заявителя: {e}")
+    return False
 
 
 async def give_applicant_role(member):

@@ -1,6 +1,6 @@
 """Кнопка для открытия модального окна заявки"""
 import discord
-from models.application_modal import FamilyApplicationModal
+from models.application_modal import FamilyApplicationModal, AFKApplicationReviewView
 
 
 class ApplicationButton(discord.ui.View):
@@ -17,6 +17,20 @@ class ApplicationButton(discord.ui.View):
     async def application_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.send_modal(FamilyApplicationModal())
 
+
+class AFKApplicationButton(discord.ui.View):
+    """AFK Кнопка для открытия модального окна заявки"""
+
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(
+        label='📝 Подать заявку на афк',
+        style=discord.ButtonStyle.primary,
+        custom_id='afk_application_button'
+    )
+    async def afk_application_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_modal(AFKApplicationReviewView())
 
 
 class ApplicationReviewView(discord.ui.View):
