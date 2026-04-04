@@ -38,7 +38,7 @@ class CreatingChats(ui.Modal, title='Создание чата для откат
         )
 
         await channel.send(
-            f"Привет {interaction.user.mention}! Присылай откаты. {admin_role.mention if admin_role else ''} .")
+            f"Привет {interaction.user.mention}! Присылай откаты. {admin_role.mention if admin_role else ''} @owner")
         await interaction.response.send_message(f"Чат создан: {channel.mention}", ephemeral=True)
 
 
