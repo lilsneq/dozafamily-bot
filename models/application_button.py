@@ -2,6 +2,22 @@
 import discord
 from models.application_modal import FamilyApplicationModal, AFKApplicationReviewView
 from utils.role_manager import remove_applicant_role
+from models.capt_button import CreatingChats
+
+
+class CaptApplicationButton(discord.ui.View):
+    """Создание модального окна кнопок для создания чата"""
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(
+        label='Создать чат для откатов',
+        style=discord.ButtonStyle.primary,
+        custom_id="CreateChats",
+    )
+    async def capt_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_modal(CreatingChats())
+
 
 class ApplicationButton(discord.ui.View):
     """Кнопка для открытия модального окна заявки"""

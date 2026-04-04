@@ -25,7 +25,10 @@ ACCEPTED_ROLE_2_ID = 1482962712844828713      # Вторая роль приня
 AFK_ROLE_ID = 1489293268008042639             # Роль для афк
 
 
-
+#создание чатов
+ADMIN_ROLE_ID = 1490059368236974160
+CATEGORY_ID = 1490059368236974160
+CAPT_CHANNEL_ID = 1490066391963930704
 
 # Файл хранения заявок
 APPLICATIONS_FILE = 'data/applications.json'

@@ -36,7 +36,8 @@ def main():
     
     # Создание бота
     bot = commands.Bot(command_prefix='l.', intents=intents, status=discord.Status.idle, activity=discord.Activity(type=discord.ActivityType.watching, name='majestic-rp.ru'), help_command=None)
-    
+
+
     # Настройка команд
     # setup_application_commands(bot)
     setup_static_commands(bot)
