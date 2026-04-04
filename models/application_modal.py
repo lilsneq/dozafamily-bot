@@ -4,7 +4,7 @@ from datetime import datetime
 from config.settings import APPLICATION_CHANNEL_ID, STATIC_CHANNEL_ID, AFK_CHANNEL_ID, AFK_PANEL_CHANNEL_ID
 from utils.storage import get_next_app_id, add_application
 from utils.logger import send_log
-from utils.role_manager import set_applicant_nickname, give_applicant_role, give_afk_role
+from utils.role_manager import give_applicant_role, remove_applicant_role
 
 
 class FamilyApplicationModal(discord.ui.Modal, title='Форма заявки'):
@@ -49,10 +49,6 @@ class FamilyApplicationModal(discord.ui.Modal, title='Форма заявки'):
 
 
     async def on_submit(self, interaction: discord.Interaction):
-        # await interaction.response.send_message(
-        #     f'✅ Ваша заявка принята! Ожидайте рассмотрения.',
-        #     ephemeral=True
-        # )
 
         from models.application_button import ApplicationReviewView
 
@@ -149,10 +145,6 @@ class AFKApplicationReviewView(discord.ui.Modal, title='Форма заявки 
     )
 
     async def on_submit(self, interaction: discord.Interaction):
-        # await interaction.response.send_message(
-        #     f'✅ Ваша заявка принята! Ожидайте рассмотрения.',
-        #     ephemeral=True
-        # )
 
         from models.application_button import ApplicationReviewView
 
@@ -205,8 +197,8 @@ class AFKApplicationReviewView(discord.ui.Modal, title='Форма заявки 
             ephemeral=True
         )
 
-        # Выдача роли заявителя
-        # await give_afk_role(interaction.user)
+        # Выдача роли заявителя AFK при попадче заявки
+
 
         # Лог
         await send_log(

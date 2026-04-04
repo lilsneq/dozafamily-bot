@@ -1,7 +1,7 @@
 """Кнопка для открытия модального окна заявки"""
 import discord
 from models.application_modal import FamilyApplicationModal, AFKApplicationReviewView
-
+from utils.role_manager import remove_applicant_role
 
 class ApplicationButton(discord.ui.View):
     """Кнопка для открытия модального окна заявки"""
@@ -45,16 +45,18 @@ class ApplicationReviewView(discord.ui.View):
     @discord.ui.button(label="Принять", style=discord.ButtonStyle.green, custom_id="approve_btn")
     async def approve(self, interaction: discord.Interaction, button: discord.ui.Button):
         from utils.role_manager import give_accepted_roles, give_afk_role
+        await remove_applicant_role(interaction.user)
+
 
         # Выбираем, какую функцию выдачи ролей вызвать
         if self.is_afk:
             success = await give_afk_role(self.applicant)
-            msg_text = f"✅ AFK-заявка #{self.app_id} одобрена. Роль AFK выдана."
-            dm_text = f"🎉 Ваш запрос на AFK #{self.app_id} был одобрен!"
+            msg_text = f"✅ AFK-заявка одобрена. Роль AFK выдана."
+            dm_text = f"🎉 Ваш запрос на AFK был одобрен!"
         else:
             success = await give_accepted_roles(self.applicant)
-            msg_text = f"✅ Заявка #{self.app_id} одобрена. Роли семьи выданы."
-            dm_text = f"🎉 Ваша заявка #{self.app_id} в семью была одобрена!"
+            msg_text = f"✅ Заявка одобрена. Роли семьи выданы."
+            dm_text = f"🎉 Ваша заявка в семью была одобрена!"
 
         if success:
             await interaction.response.send_message(msg_text, ephemeral=True)
@@ -71,11 +73,11 @@ class ApplicationReviewView(discord.ui.View):
     async def deny(self, interaction: discord.Interaction, button: discord.ui.Button):
         subject = "на AFK" if self.is_afk else "в семью"
 
-        await interaction.response.send_message(f"❌ Заявка #{self.app_id} отклонена.", ephemeral=True)
+        await interaction.response.send_message(f"❌ Заявка отклонена.", ephemeral=True)
         self.stop()
         await interaction.message.edit(view=None)
 
         try:
-            await self.applicant.send(f"😔 К сожалению, ваша заявка #{self.app_id} {subject} была отклонена.")
+            await self.applicant.send(f"😔 К сожалению, ваша заявка {subject} была отклонена.")
         except:
             pass

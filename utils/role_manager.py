@@ -49,13 +49,10 @@ async def give_accepted_roles(member):
     """Выдать роли принятому"""
     try:
         role1 = member.guild.get_role(ACCEPTED_ROLE_1_ID)
-        role2 = member.guild.get_role(ACCEPTED_ROLE_2_ID)
-        
+
         if role1:
             await member.add_roles(role1)
-        if role2:
-            await member.add_roles(role2)
-        
+
         return True
     except Exception as e:
         print(f"Ошибка при выдаче ролей принятого: {e}")
