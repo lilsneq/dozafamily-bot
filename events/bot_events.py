@@ -138,7 +138,6 @@ def setup_bot_events(bot):
             await capt_channel.purge(check=lambda m: m.author == bot.user)
 
             emb = discord.Embed(title=' Создание чата для откатов', color=discord.Color.red())
-            # Если нужно фото, как в других твоих панелях:
             file = discord.File("assets/rules.jpg", filename="rules.jpg")
             emb.set_image(url="attachment://rules.jpg")
 
