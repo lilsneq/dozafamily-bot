@@ -132,18 +132,19 @@ def setup_bot_events(bot):
             except Exception as e:
                 print(f'Ошибка при отправке правил: {e}')
 
+
         capt_channel = bot.get_channel(CAPT_CHANNEL_ID)
         if capt_channel:
             await capt_channel.purge(check=lambda m: m.author == bot.user)
 
-            emb = discord.Embed(title='🎥 Создание чата для откатов', color=discord.Color.red())
+            emb = discord.Embed(title=' Создание чата для откатов', color=discord.Color.red())
             # Если нужно фото, как в других твоих панелях:
             file = discord.File("assets/rules.jpg", filename="rules.jpg")
             emb.set_image(url="attachment://rules.jpg")
 
             await capt_channel.send(file=file, embed=emb, view=CaptApplicationButton())
             bot.add_view(CaptApplicationButton())  # Чтобы кнопка работала всегда
-            print(f'✅ Панель откатов создана в {capt_channel.name}')
+            print(f' Панель откатов создана в {capt_channel.name}')
 
         # Логирование запуска
         for guild in bot.guilds:
