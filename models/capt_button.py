@@ -49,7 +49,7 @@ class CaptApplicationButton(ui.View):
         # Приветствие в канале
         await channel.send(
             f"Привет {interaction.user.mention}! Этот чат создан специально для твоих откатов.\n"
-            f"<@&{ADMIN_ROLE_ID}> <@&{OWNER_ROLE_ID}>"
+            f"<@&{OWNER_ROLE_ID}>"
         )
 
 
