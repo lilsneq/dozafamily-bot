@@ -1,7 +1,6 @@
 """События бота"""
 import asyncio
 
-import discord
 from config.settings import PANEL_CHANNEL_ID, RULES_CHANNEL_ID, AFK_CHANNEL_ID
 from models.application_button import ApplicationButton, AFKApplicationButton
 from models.rules_button import RulesButton
@@ -11,9 +10,9 @@ import discord
 from models.capt_button import CaptApplicationButton
 from config.settings import CAPT_CHANNEL_ID
 
+
 def setup_bot_events(bot):
     """Настройка событий бота"""
-
 
     @bot.event
     async def on_ready():
