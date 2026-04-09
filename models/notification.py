@@ -7,62 +7,66 @@ from config.settings import SUBSCRIPTION_CHANNEL_ID
 from datetime import datetime
 from utils.storage import add_application, add_application_sub
 from utils.logger import send_log
+from datetime import datetime, timedelta
 
 
 class SubscriptionModal(discord.ui.Modal, title='Информация о подписке'):
     """Кнопка для заполнения даты"""
 
     date_input = discord.ui.TextInput(
-        label='Введи ДД.ММ.ГГГГ',
+        label='Введи дату начала подписки ДД.ММ.ГГГГ',
         placeholder='например 04.03.2026',
         min_length=10,
         max_length=10
     )
 
+
+
+
     async def on_submit(self, interaction: discord.Interaction):
         raw_date = self.date_input.value
 
         try:
-            # Парсим дату для проверки корректности
-            day, month, year = map(int, raw_date.split('.'))
+            # Парсим введенную дату (дату начала)
+            start_date = datetime.strptime(raw_date, "%d.%m.%Y")
 
-            # 2. Получаем канал через get_channel (из контекста сервера)
-            channel = interaction.guild.get_channel(SUBSCRIPTION_CHANNEL_ID)
+            # ВЫЧИСЛЯЕМ дату окончания (+30 дней)
+            end_date = start_date + timedelta(days=30)
 
-            # Подготовка данных для JSON
             app_data = {
                 'user_id': interaction.user.id,
                 'user_name': str(interaction.user),
-                'day': day,
-                'month': month,
-                'year': year,
+                'start_date': start_date.strftime("%d.%m.%Y"),
+                # Сохраняем компоненты даты окончания для задачи проверки
+                'day': end_date.day,
+                'month': end_date.month,
+                'year': end_date.year,
                 'timestamp': datetime.utcnow().isoformat()
             }
 
             add_application_sub(app_data)
 
-            # Создание Embed
             embed = discord.Embed(
-                title='Информация обновлена',
-                description=f'Новая дата истечения: **{raw_date}**',
-                color=discord.Color.gold(),
+                title='Подписка зарегистрирована',
+                description=(
+                    f'Дата начала: **{raw_date}**\n'
+                    f'Дата окончания: **{end_date.strftime("%d.%m.%Y")}**\n\n'
+                    f'Бот напомнит вам об оплате за 3 дня до конца.'
+                ),
+                color=discord.Color.green(),
                 timestamp=datetime.utcnow()
             )
 
-            # Отправка лога и ответа
-            await interaction.response.send_message("✅ Данные успешно сохранены!", ephemeral=True)
+            await interaction.response.send_message("✅ Данные сохранены! Окончание через 30 дней.", ephemeral=True)
 
+            channel = interaction.guild.get_channel(SUBSCRIPTION_CHANNEL_ID)
             if channel:
                 await channel.send(embed=embed)
 
-            await send_log(
-                interaction.guild,
-                f'📋 **Время подписки обновлено**\nПользователь: {interaction.user.mention}',
-                discord.Color.gold()
-            )
-
         except ValueError:
-            await interaction.response.send_message("❌ Неверный формат даты! Используйте ДД.ММ.ГГГГ", ephemeral=True)
+            await interaction.response.send_message("❌ Ошибка! Используйте формат ДД.ММ.ГГГГ (например, 09.04.2026)",
+                                                    ephemeral=True)
+
 
 
 # 2. Кнопка, которая вызывает это модальное окно
