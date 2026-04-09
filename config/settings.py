@@ -27,9 +27,11 @@ AFK_ROLE_ID = 1489293268008042639             # Роль для афк
 
 #создание чатов
 ADMIN_ROLE_ID = 1490059368236974160
-CATEGORY_ID = 1490059368236974160
-CAPT_CHANNEL_ID = 1490074983731564616
+CATEGORY_ID = 1490059368236974160             # ID категории где создаётся чат
+CAPT_CHANNEL_ID = 1490066391963930704         # ID чата где создаётся заявка
 OWNER_ROLE_ID = 1482962909138260079
 
 # Файл хранения заявок
 APPLICATIONS_FILE = 'data/applications.json'
+
+
