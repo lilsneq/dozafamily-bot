@@ -16,6 +16,7 @@ class SubscriptionTasks(commands.Cog):
     def cog_unload(self):
         self.check_subscriptions.cancel()
 
+
     @tasks.loop(hours=12)
     async def check_subscriptions(self):
         # 1. Ждем, пока бот полностью загрузится
