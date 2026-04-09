@@ -48,6 +48,34 @@ def get_next_app_id():
     return application_counter
 
 
+DATA_FILE = 'data/sub.json'
+
+def add_application_sub(data):
+    """Сохраняет данные о подписке в JSON файл"""
+
+    # Создаем папку data, если её нет
+    os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
+
+    # 1. Читаем текущие данные
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, 'r', encoding='utf-8') as f:
+            try:
+                all_data = json.load(f)
+                if not isinstance(all_data, list):
+                    all_data = []
+            except json.JSONDecodeError:
+                all_data = []
+    else:
+        all_data = []
+
+    # 2. Добавляем новую запись
+    all_data.append(data)
+
+    # 3. Сохраняем обратно
+    with open(DATA_FILE, 'w', encoding='utf-8') as f:
+        json.dump(all_data, f, indent=4, ensure_ascii=False)
+
+
 def add_application(app_data):
     """Добавить заявку"""
     app_id = str(app_data['id'])

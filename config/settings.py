@@ -31,6 +31,10 @@ CATEGORY_ID = 1490059368236974160             # ID категории где с�
 CAPT_CHANNEL_ID = 1490066391963930704         # ID чата где создаётся заявка
 OWNER_ROLE_ID = 1482962909138260079
 
+
+#чат для подписки
+SUBSCRIPTION_CHANNEL_ID = 1491754463202115654
+
 # Файл хранения заявок
 APPLICATIONS_FILE = 'data/applications.json'
 

@@ -66,6 +66,7 @@ class FamilyApplicationModal(discord.ui.Modal, title='Форма заявки'):
             'status': 'pending',
             'timestamp': datetime.utcnow().isoformat()
         }
+
         add_application(app_data)
         
         # Создание embed для заявки

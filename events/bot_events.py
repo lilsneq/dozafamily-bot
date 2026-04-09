@@ -1,14 +1,14 @@
 """События бота"""
 import asyncio
 
-from config.settings import PANEL_CHANNEL_ID, RULES_CHANNEL_ID, AFK_CHANNEL_ID
+from config.settings import PANEL_CHANNEL_ID, RULES_CHANNEL_ID, AFK_CHANNEL_ID, SUBSCRIPTION_CHANNEL_ID, CAPT_CHANNEL_ID
 from models.application_button import ApplicationButton, AFKApplicationButton
 from models.rules_button import RulesButton
 from utils.storage import load_applications
 from utils.logger import send_log
 import discord
 from models.capt_button import CaptApplicationButton
-from config.settings import CAPT_CHANNEL_ID
+from models.notification import SubscriptionModal, SubscriptionView
 
 
 def setup_bot_events(bot):
@@ -132,6 +132,21 @@ def setup_bot_events(bot):
                 print(f'Ошибка при отправке правил: {e}')
 
 
+        #ЧАТ ПОДПИСКИ БОТА
+        sub_channel = bot.get_channel(SUBSCRIPTION_CHANNEL_ID)
+        if sub_channel:
+            await sub_channel.purge(check=lambda m: m.author == bot.user)
+
+            emb = discord.Embed(title='Кнопка подписки', color=discord.Color.red())
+            file = discord.File("assets/rules.jpg", filename="rules.jpg")
+            emb.set_image(url="attachment://rules.jpg")
+
+            await sub_channel.send(file=file, embed=emb, view=SubscriptionView())
+            bot.add_view(SubscriptionView())  # Чтобы кнопка работала всегда
+            print(f'Панель пописки создана{sub_channel.name}')
+
+
+        #ЧАТ КАПТОВ
         capt_channel = bot.get_channel(CAPT_CHANNEL_ID)
         if capt_channel:
             await capt_channel.purge(check=lambda m: m.author == bot.user)
@@ -142,7 +157,8 @@ def setup_bot_events(bot):
 
             await capt_channel.send(file=file, embed=emb, view=CaptApplicationButton())
             bot.add_view(CaptApplicationButton())  # Чтобы кнопка работала всегда
-            print(f' Панель откатов создана в {capt_channel.name}')
+            print(f'Панель откатов создана в {capt_channel.name}')
+
 
         # Логирование запуска
         for guild in bot.guilds:
