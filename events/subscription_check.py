@@ -19,7 +19,6 @@ class SubscriptionTasks(commands.Cog):
 
     @tasks.loop(hours=12)
     async def check_subscriptions(self):
-        # 1. Ждем, пока бот полностью загрузится
         await self.bot.wait_until_ready()
 
         if not os.path.exists(DATA_FILE):
@@ -31,37 +30,41 @@ class SubscriptionTasks(commands.Cog):
             except:
                 return
 
-        # 2. Ищем канал (сначала в кэше, потом через fetch)
         channel = self.bot.get_channel(SUBSCRIPTION_CHANNEL_ID)
-        if not channel:
-            try:
-                channel = await self.bot.fetch_channel(SUBSCRIPTION_CHANNEL_ID)
-            except:
-                print(f"❌ Не удалось найти канал с ID {SUBSCRIPTION_CHANNEL_ID}")
-                return
+        if not channel: return
 
         today = date.today()
-        print(f"🔎 Запущена проверка подписок... Найдено записей: {len(subs)}")
 
         for sub in subs:
             try:
                 end_date = date(sub['year'], sub['month'], sub['day'])
                 delta = (end_date - today).days
 
-                # Отладочный принт в консоль
-                print(f"Проверка {sub['user_name']}: осталось {delta} дней.")
+                # 1. Если подписка ИСТЕКЛА (прошел хотя бы 1 день после даты конца)
+                if delta < 0:
+                    # Удаляем все сообщения бота в этом канале, чтобы убрать старые предупреждения
+                    def is_bot(m): return m.author == self.bot.user
 
-                if 0 < delta <= 3:
-                    await channel.send(
-                        f"⚠️ **Внимание!**\n"
-                        f"Подписка пользователя <@{sub['user_id']}> истекает через **{delta}** дн.\n"
-                        f"Дата окончания: `{end_date.strftime('%d.%m.%Y')}`"
-                    )
-                elif delta == 0:
-                    await channel.send(f"🚨 **Срочно!** Подписка <@{sub['user_id']}> истекает **сегодня**!")
+                    await channel.purge(limit=10, check=is_bot)
+                    print(f"🧹 Старые уведомления для {sub['user_name']} удалены, так как срок вышел.")
+                    continue  # Переходим к следующему пользователю
+
+                # 2. Если подписка скоро закончится (3, 2, 1 день или сегодня)
+                if 0 <= delta <= 3:
+                    # Сначала удаляем старое сообщение бота, чтобы не спамить
+                    await channel.purge(limit=5, check=lambda m: m.author == self.bot.user and "Внимание" in m.content)
+
+                    if delta > 0:
+                        await channel.send(
+                            f"⚠️ **Внимание!**\nПодписка <@{sub['user_id']}> истекает через **{delta}** дн.\n"
+                            f"Дата окончания: `{end_date.strftime('%d.%m.%Y')}`"
+                        )
+                    else:
+                        await channel.send(f"🚨 **Срочно!** Подписка <@{sub['user_id']}> истекает **сегодня**!")
 
             except Exception as e:
-                print(f"Ошибка при обработке даты для {sub.get('user_name')}: {e}")
+                print(f"Ошибка: {e}")
+
 
 
 # Исправленная функция регистрации
