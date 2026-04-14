@@ -142,7 +142,7 @@ def setup_bot_events(bot):
             emb.set_image(url="attachment://rules.jpg")
 
             await sub_channel.send(file=file, embed=emb, view=SubscriptionView())
-            bot.add_view(SubscriptionView())  # Чтобы кнопка работала всегда
+            bot.add_view(SubscriptionView())
             print(f'Панель пописки создана{sub_channel.name}')
 
 
@@ -156,7 +156,7 @@ def setup_bot_events(bot):
             emb.set_image(url="attachment://rules.jpg")
 
             await capt_channel.send(file=file, embed=emb, view=CaptApplicationButton())
-            bot.add_view(CaptApplicationButton())  # Чтобы кнопка работала всегда
+            bot.add_view(CaptApplicationButton())
             print(f'Панель откатов создана в {capt_channel.name}')
 
 

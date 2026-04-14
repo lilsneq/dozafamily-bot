@@ -40,16 +40,15 @@ class SubscriptionTasks(commands.Cog):
                 end_date = date(sub['year'], sub['month'], sub['day'])
                 delta = (end_date - today).days
 
-                # 1. Если подписка ИСТЕКЛА (прошел хотя бы 1 день после даты конца)
+                # подписка истекла
                 if delta < 0:
-                    # Удаляем все сообщения бота в этом канале, чтобы убрать старые предупреждения
                     def is_bot(m): return m.author == self.bot.user
 
                     await channel.purge(limit=10, check=is_bot)
                     print(f"🧹 Старые уведомления для {sub['user_name']} удалены, так как срок вышел.")
-                    continue  # Переходим к следующему пользователю
+                    continue
 
-                # 2. Если подписка скоро закончится (3, 2, 1 день или сегодня)
+                # подписка скоро закончится
                 if 0 <= delta <= 3:
                     # Сначала удаляем старое сообщение бота, чтобы не спамить
                     await channel.purge(limit=5, check=lambda m: m.author == self.bot.user and "Внимание" in m.content)
@@ -67,7 +66,7 @@ class SubscriptionTasks(commands.Cog):
 
 
 
-# Исправленная функция регистрации
+# функция регистрации
 async def setup_subscription_task(bot):
     if not bot.get_cog("SubscriptionTasks"):
         await bot.add_cog(SubscriptionTasks(bot))
