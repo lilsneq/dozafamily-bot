@@ -7,7 +7,7 @@ from config.settings import (PANEL_CHANNEL_ID, RULES_CHANNEL_ID,
 
 from models.application_button import ApplicationButton, AFKApplicationButton, CaptPanelButtons
 from models.rules_button import RulesButton
-from utils.storage import load_applications
+from utils.storage import load_applications, start_new_capt_id
 from utils.logger import send_log
 import discord
 from models.capt_button import CaptApplicationButton
@@ -179,8 +179,10 @@ def setup_bot_events(bot):
         try:
             capt_panel_channel = guild.get_channel(CHANNEL_FOR_CAPT)
 
+            new_id = start_new_capt_id()
+
             capt_embed = discord.Embed(
-                title='👳🏿‍♀️ЗАЯВКА НА КАПТ',
+                title=f'👳🏿‍♀️ЗАЯВКА НА КАПТ №{new_id}',
                 description='НАЖМИТЕ НА ПРИНЯТЬ ЕСЛИ ВЫ ХОТИТЕ УЧАСТВОВАТЬ В КАПТЕ\n' 
                             'НАЖМИТЕ НА УДАЛИТЬ ЕСЛИ ХОТИТЕ ЧТОБЫ ВСЕ УЧАСТНИКИ УДАЛИЛИСЬ\n'
                             '/new_capt создание новой панели',

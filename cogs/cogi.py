@@ -25,10 +25,9 @@ async def new_capt_command(interaction: discord.Interaction):
         return
 
     try:
-        # 2. Полностью очищаем канал перед созданием новой панели
-        await capt_panel_channel.purge(limit=None)
 
-        # 3. Формируем Embed с динамическим номером капта
+
+
         capt_embed = discord.Embed(
             title=f'👳🏿‍♀️ ЗАЯВКА НА КАПТ №{new_id}',
             description=(
