@@ -47,12 +47,14 @@ def main():
 
     bot = MyBot()
 
+    bot.tree.add_command(new_capt_command)
+
+
     # Настройка команд и событий
     setup_static_commands(bot)
     setup_bot_events(bot)
     setup_server_events(bot)
 
-    bot.tree.add_command(new_capt_command)
 
     print('🚀 Запуск бота...')
     bot.run(TOKEN)
