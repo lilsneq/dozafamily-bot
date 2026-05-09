@@ -8,16 +8,13 @@ from models.application_button import CaptPanelButtons
 
 # Создаем слэш-команду и привязываем её к глобальному дереву бота
 @app_commands.command(name="new_capt", description="Создать новую панель капта (автоматически увеличит номер капта)")
-@app_commands.checks.has_permissions(administrator=True) # Доступ только администраторам
+@app_commands.checks.has_permissions(administrator=True)
 async def new_capt_command(interaction: discord.Interaction):
-    # Говорим Discord, что бот обрабатывает запрос (скрыто от обычных пользователей)
     await interaction.response.defer(ephemeral=True)
 
-    # 1. Генерируем новый ID капта (+1 к счетчику в вашем CAPTS_FILE)
     new_id = start_new_capt_id()
 
     guild = interaction.guild
-    # Находим нужный текстовый канал по ID из настроек
     capt_panel_channel = guild.get_channel(CHANNEL_FOR_CAPT)
 
     if not capt_panel_channel:
@@ -38,19 +35,15 @@ async def new_capt_command(interaction: discord.Interaction):
             color=discord.Color.red()
         )
 
-        # 4. Инициализируем вечные кнопки
         view = CaptPanelButtons()
 
-        # 5. Отправляем чистую панель в текстовый канал
         await capt_panel_channel.send(embed=capt_embed, view=view)
 
-        # Отвечаем администратору, что всё прошло успешно
         await interaction.followup.send(
             f"✅ Успешно открыта панель для Капта №{new_id} в канале {capt_panel_channel.mention}!",
             ephemeral=True
         )
 
-        # Логгирование (импортируем функцию из модуля событий, если она там)
         from events.bot_events import send_log
         await send_log(
             guild,
