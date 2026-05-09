@@ -16,7 +16,7 @@ STATIC_CHANNEL_ID = 1448565203875926128
 RULES_CHANNEL_ID = 1488255736923426938        # Канал для правил
 AFK_CHANNEL_ID = 1487901448254521455          # Канал для афк и запросы почему афк
 AFK_PANEL_CHANNEL_ID = 1483280022277197865    # Канал для рассмотрения заявок на афк
-
+CHANNEL_FOR_CAPT = 1502673126268473355        # Канал для подачи заявки на капт
 
 # ID ролей
 APPLICANT_ROLE_ID = 1236152852054016042       # Роль для подающих заявки NO name
@@ -37,5 +37,6 @@ SUBSCRIPTION_CHANNEL_ID = 1491754463202115654
 
 # Файл хранения заявок
 APPLICATIONS_FILE = 'data/applications.json'
+CAPTS_FILE = 'data/capts.json'
 
 

@@ -2,6 +2,8 @@
 import discord
 from models.application_modal import FamilyApplicationModal, AFKApplicationReviewView
 from utils.role_manager import remove_applicant_role
+from config.settings import CAPTS_FILE
+from utils.storage import load_capt_participants, save_capt_participants
 
 
 
@@ -83,3 +85,60 @@ class ApplicationReviewView(discord.ui.View):
             await self.applicant.send(f"😔 К сожалению, ваша заявка {subject} была отклонена.")
         except:
             pass
+
+
+class CaptPanelButtons(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)  # Вечные кнопки
+
+    @discord.ui.button(label="Принять", style=discord.ButtonStyle.green, custom_id="capt_accept_unique_id")
+    async def accept_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        # Работаем через ID пользователя (int), так как это надежнее всего для JSON
+        user_id = interaction.user.id
+
+        # Читаем актуальный список из JSON-файла заявок
+        participants = load_capt_participants()
+
+        # Проверяем, записан ли уже игрок
+        if user_id in participants:
+            await interaction.response.send_message("❌ Вы уже записаны на капт!", ephemeral=True)
+            return
+
+        # Добавляем ID игрока в список и сохраняем файл
+        participants.append(user_id)
+        save_capt_participants(participants)
+
+        # Строим текстовые пинги в столбик <@ID>
+        participants_text = "\n".join([f"{idx + 1}. <@{uid}>" for idx, uid in enumerate(participants)])
+
+        # Получаем текущий Embed из сообщения и обновляем его описание
+        embed = interaction.message.embeds[0]
+        embed.description = (
+            "НАЖМИТЕ НА ПРИНЯТЬ, ЕСЛИ ВЫ ХОТИТЕ УЧАСТВОВАТЬ В КАПТЕ\n"
+            "НАЖМИТЕ НА УДАЛИТЬ, ЕСЛИ ХОТИТЕ, ЧТОБЫ ВСЕ УЧАСТНИКИ УДАЛИЛИСЬ\n\n"
+            f"**СПИСОК УЧАСТНИКОВ ({len(participants)}):**\n{participants_text}"
+        )
+
+        # Редактируем сообщение (обновляем эмбед прямо в Дискорде)
+        await interaction.response.edit_message(embed=embed)
+
+    @discord.ui.button(label="Удалить участников", style=discord.ButtonStyle.red, custom_id="capt_clear_unique_id")
+    async def clear_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        # Проверка прав администратора
+        if not interaction.user.guild_permissions.administrator:
+            await interaction.response.send_message("❌ У вас нет прав для очистки списка!", ephemeral=True)
+            return
+
+        # Полностью очищаем список в JSON-файле заявок
+        save_capt_participants([])
+
+        # Возвращаем Embed к исходному состоянию без списка
+        embed = interaction.message.embeds[0]
+        embed.description = (
+            "НАЖМИТЕ НА ПРИНЯТЬ, ЕСЛИ ВЫ ХОТИТЕ УЧАСТВОВАТЬ В КАПТЕ\n"
+            "НАЖМИТЕ НА УДАЛИТЬ, ЕСЛИ ХОТИТЕ, ЧТОБЫ ВСЕ УЧАСТНИКИ УДАЛИЛИСЬ\n\n"
+            "**СПИСОК УЧАСТНИКОВ (0):**\n*Список пуст*"
+        )
+
+        # Обновляем сообщение
+        await interaction.response.edit_message(embed=embed)

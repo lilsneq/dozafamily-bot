@@ -1,7 +1,7 @@
 """Модуль для работы с хранением заявок"""
 import json
 import os
-from config.settings import APPLICATIONS_FILE
+from config.settings import APPLICATIONS_FILE, CAPTS_FILE
 
 # Хранилище заявок
 applications = {}
@@ -18,6 +18,8 @@ def load_applications():
                 applications = data.get('applications', {})
                 application_counter = data.get('counter', 0)
             print(f'Загружено {len(applications)} заявок')
+
+            load_capt_participants()
         else:
             # Создаем директорию data если её нет
             os.makedirs(os.path.dirname(APPLICATIONS_FILE), exist_ok=True)
@@ -96,3 +98,60 @@ def update_application(app_id, updates):
         save_applications()
         return True
     return False
+
+
+def load_capt_data():
+    """Загрузка всей структуры каптов (номер и история) из CAPTS_FILE"""
+    if os.path.exists(CAPTS_FILE):
+        try:
+            with open(CAPTS_FILE, 'r', encoding='utf-8') as f:
+                content = f.read().strip()
+                if not content:
+                    return {"current_id": 1, "history": {}}
+                return json.loads(content)
+        except Exception as e:
+            print(f"[ОШИБКА ЧТЕНИЯ {CAPTS_FILE}]: {e}")
+    return {"current_id": 1, "history": {}}
+
+
+def save_capt_data(capt_data):
+    """Сохранение структуры каптов строго в файл CAPTS_FILE"""
+    try:
+        os.makedirs(os.path.dirname(CAPTS_FILE), exist_ok=True)
+        with open(CAPTS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(capt_data, f, ensure_ascii=False, indent=2)
+            f.flush()
+            os.fsync(f.fileno())
+        print(f"[УСПЕХ]: Данные капта сохранены в {CAPTS_FILE}")
+    except Exception as e:
+        print(f"[ОШИБКА ЗАПИСИ В {CAPTS_FILE}]: {e}")
+
+
+def get_current_capt_id():
+    """Получить номер текущего активного капта"""
+    return load_capt_data()["current_id"]
+
+
+def load_capt_participants():
+    """Загрузить участников для текущего номера капта"""
+    capt_data = load_capt_data()
+    current_id = str(capt_data["current_id"])
+    return capt_data["history"].get(current_id, [])
+
+
+def save_capt_participants(new_list):
+    """Сохранить участников для текущего номера капта"""
+    capt_data = load_capt_data()
+    current_id = str(capt_data["current_id"])
+    capt_data["history"][current_id] = new_list
+    save_capt_data(capt_data)
+
+
+def start_new_capt_id():
+    """Переключить счетчик на +1 капт и создать под него чистую историю"""
+    capt_data = load_capt_data()
+    capt_data["current_id"] += 1
+    current_id = str(capt_data["current_id"])
+    capt_data["history"][current_id] = []
+    save_capt_data(capt_data)
+    return capt_data["current_id"]

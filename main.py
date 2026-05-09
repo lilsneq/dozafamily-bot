@@ -9,7 +9,8 @@ from config.settings import TOKEN
 from commands.static import setup_static_commands
 from events.bot_events import setup_bot_events
 from events.server_events import setup_server_events
-from events.subscription_check import SubscriptionTasks  # Импортируем сам класс
+from cogs.cogi import new_capt_command
+from events.subscription_check import SubscriptionTasks
 import ssl
 import os
 
@@ -50,6 +51,8 @@ def main():
     setup_static_commands(bot)
     setup_bot_events(bot)
     setup_server_events(bot)
+
+    bot.tree.add_command(new_capt_command)
 
     print('🚀 Запуск бота...')
     bot.run(TOKEN)
