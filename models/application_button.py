@@ -1,10 +1,20 @@
 """Кнопка для открытия модального окна заявки"""
 import discord
+import re
 from models.application_modal import FamilyApplicationModal, AFKApplicationReviewView
 from utils.role_manager import remove_applicant_role
 from config.settings import CAPTS_FILE
-from utils.storage import load_capt_participants, save_capt_participants
+from utils.storage import (
+    load_capt_participants,
+    save_capt_participants,
+    load_capt_data,
+    save_capt_data,
+    is_capt_locked,
+    set_capt_lock
+)
 
+# ИСПРАВЛЕНИЕ ИМПОРТА: Добавили функции load_capt_data и save_capt_data, чтобы они не выдавали NameError
+from utils.storage import load_capt_participants, save_capt_participants, load_capt_data, save_capt_data
 
 
 class ApplicationButton(discord.ui.View):
@@ -93,52 +103,100 @@ class CaptPanelButtons(discord.ui.View):
 
     @discord.ui.button(label="Принять", style=discord.ButtonStyle.green, custom_id="capt_accept_unique_id")
     async def accept_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # Работаем через ID пользователя (int), так как это надежнее всего для JSON
-        user_id = interaction.user.id
+        await interaction.response.defer()
 
-        # Читаем актуальный список из JSON-файла заявок
-        participants = load_capt_participants()
-
-        # Проверяем, записан ли уже игрок
-        if user_id in participants:
-            await interaction.response.send_message("❌ Вы уже записаны на капт!", ephemeral=True)
+        embed = interaction.message.embeds[0]
+        match = re.search(r'№(\d+)', embed.title)
+        if match:
+            capt_id = match.group(1)
+        else:
+            await interaction.followup.send("❌ Не удалось определить номер капта.", ephemeral=True)
             return
 
-        # Добавляем ID игрока в список и сохраняем файл
-        participants.append(user_id)
+        if is_capt_locked(capt_id):
+            await interaction.followup.send(f"🔒 Запись на Капт №{capt_id} уже закрыта администрацией!", ephemeral=True)
+            return
+
+        participants = load_capt_participants()
+
+        if interaction.user.id in participants:
+            await interaction.followup.send(f"❌ Вы уже записаны на Капт №{capt_id}!", ephemeral=True)
+            return
+
+        participants.append(interaction.user.id)
         save_capt_participants(participants)
 
-        # Строим текстовые пинги в столбик <@ID>
         participants_text = "\n".join([f"{idx + 1}. <@{uid}>" for idx, uid in enumerate(participants)])
 
-        # Получаем текущий Embed из сообщения и обновляем его описание
-        embed = interaction.message.embeds[0]
         embed.description = (
             "НАЖМИТЕ НА ПРИНЯТЬ, ЕСЛИ ВЫ ХОТИТЕ УЧАСТВОВАТЬ В КАПТЕ\n"
             "НАЖМИТЕ НА УДАЛИТЬ, ЕСЛИ ХОТИТЕ, ЧТОБЫ ВСЕ УЧАСТНИКИ УДАЛИЛИСЬ\n\n"
             f"**СПИСОК УЧАСТНИКОВ ({len(participants)}):**\n{participants_text}"
         )
 
-        # Редактируем сообщение (обновляем эмбед прямо в Дискорде)
-        await interaction.response.edit_message(embed=embed)
+        await interaction.message.edit(embeds=[embed])
 
     @discord.ui.button(label="Удалить участников", style=discord.ButtonStyle.red, custom_id="capt_clear_unique_id")
     async def clear_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # Проверка прав администратора
         if not interaction.user.guild_permissions.administrator:
-            await interaction.response.send_message("❌ У вас нет прав для очистки списка!", ephemeral=True)
+            await interaction.response.send_message("❌ У вас нет прав!", ephemeral=True)
             return
 
-        # Полностью очищаем список в JSON-файле заявок
+        await interaction.response.defer()
+        embed = interaction.message.embeds[0]
+        match = re.search(r'№(\d+)', embed.title)
+        if not match:
+            await interaction.followup.send("❌ Ошибка определения номера панели.", ephemeral=True)
+            return
+
+        capt_id = match.group(1)
+
         save_capt_participants([])
 
-        # Возвращаем Embed к исходному состоянию без списка
-        embed = interaction.message.embeds[0]
         embed.description = (
             "НАЖМИТЕ НА ПРИНЯТЬ, ЕСЛИ ВЫ ХОТИТЕ УЧАСТВОВАТЬ В КАПТЕ\n"
             "НАЖМИТЕ НА УДАЛИТЬ, ЕСЛИ ХОТИТЕ, ЧТОБЫ ВСЕ УЧАСТНИКИ УДАЛИЛИСЬ\n\n"
             "**СПИСОК УЧАСТНИКОВ (0):**\n*Список пуст*"
         )
 
-        # Обновляем сообщение
-        await interaction.response.edit_message(embed=embed)
+        await interaction.message.edit(embeds=[embed])
+
+
+    @discord.ui.button(label="🔒 Закрыть запись", style=discord.ButtonStyle.secondary, custom_id="capt_toggle_lock_id")
+    async def toggle_lock_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        # Проверяем права администратора
+        if not interaction.user.guild_permissions.administrator:
+            await interaction.response.send_message("❌ У вас нет прав для изменения статуса регистрации!",
+                                                    ephemeral=True)
+            return
+
+        await interaction.response.defer()
+        embed = interaction.message.embeds[0]
+        match = re.search(r'№(\d+)', embed.title)
+        if not match:
+            await interaction.followup.send("❌ Ошибка определения номера панели.", ephemeral=True)
+            return
+
+        capt_id = match.group(1)
+
+        # Меняем статус на противоположный
+        currently_locked = is_capt_locked(capt_id)
+        new_status = not currently_locked
+        set_capt_lock(capt_id, new_status)
+
+        # Изменяем внешний вид кнопки прямо на панели
+        if new_status:
+            button.label = " Открыть запись"
+            button.style = discord.ButtonStyle.primary
+            status_msg = f" Запись на Капт №{capt_id} успешно **закрыта** {interaction.user.mention}."
+        else:
+            button.label = " Закрыть запись"
+            button.style = discord.ButtonStyle.secondary
+            status_msg = f" Запись на Капт №{capt_id} успешно **открыта** {interaction.user.mention}."
+
+        # Редактируем сообщение, передавая обновленные эмбед и view с измененной кнопкой
+        await interaction.message.edit(embeds=[embed], view=self)
+
+        # Отправляем уведомление модератору в скрытом режиме
+        await interaction.followup.send(status_msg, ephemeral=True)
+

@@ -136,22 +136,56 @@ def load_capt_participants():
     """Загрузить участников для текущего номера капта"""
     capt_data = load_capt_data()
     current_id = str(capt_data["current_id"])
-    return capt_data["history"].get(current_id, [])
+    # Теперь история хранит словарь {"users": [], "locked": False}
+    capt_block = capt_data["history"].get(current_id, {"users": [], "locked": False})
+
+    # Поддержка старого формата (если раньше там был просто список)
+    if isinstance(capt_block, list):
+        return capt_block
+    return capt_block.get("users", [])
 
 
 def save_capt_participants(new_list):
     """Сохранить участников для текущего номера капта"""
     capt_data = load_capt_data()
     current_id = str(capt_data["current_id"])
-    capt_data["history"][current_id] = new_list
+
+    capt_block = capt_data["history"].get(current_id, {"users": [], "locked": False})
+    if isinstance(capt_block, list):
+        capt_block = {"users": capt_block, "locked": False}
+
+    capt_block["users"] = new_list
+    capt_data["history"][current_id] = capt_block
     save_capt_data(capt_data)
 
 
 def start_new_capt_id():
-    """Переключить счетчик на +1 капт и создать под него чистую историю"""
+    """Переключить счетчик на +1 капт и создать под него чистую структуру"""
     capt_data = load_capt_data()
     capt_data["current_id"] += 1
     current_id = str(capt_data["current_id"])
-    capt_data["history"][current_id] = []
+    # Новый капт по умолчанию открыт ("locked": False)
+    capt_data["history"][current_id] = {"users": [], "locked": False}
     save_capt_data(capt_data)
     return capt_data["current_id"]
+
+
+def is_capt_locked(capt_id):
+    """Проверить, заблокирован ли конкретный капт"""
+    capt_data = load_capt_data()
+    capt_block = capt_data["history"].get(str(capt_id), {"users": [], "locked": False})
+    if isinstance(capt_block, list):
+        return False
+    return capt_block.get("locked", False)
+
+
+def set_capt_lock(capt_id, status: bool):
+    """Установить статус блокировки для капта (True/False)"""
+    capt_data = load_capt_data()
+    capt_block = capt_data["history"].get(str(capt_id), {"users": [], "locked": False})
+    if isinstance(capt_block, list):
+        capt_block = {"users": capt_block, "locked": False}
+
+    capt_block["locked"] = status
+    capt_data["history"][str(capt_id)] = capt_block
+    save_capt_data(capt_data)
