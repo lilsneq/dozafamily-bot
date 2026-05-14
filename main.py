@@ -33,12 +33,21 @@ class MyBot(commands.Bot):
             help_command=None
         )
 
-    async def setup_hook(self):
-        """Этот метод вызывается ПЕРЕД запуском бота (внутри run)"""
-        # Регистрируем задачу проверки подписок
-        await self.add_cog(SubscriptionTasks(self))
-        print("✅ Задача проверки подписок запущена")
 
+    async def setup_hook(self):
+        try:
+            await self.add_cog(SubscriptionTasks(self))
+            print("Задача проверки подписок запущена")
+        except Exception as e:
+            print(f'Ошибка проверки подписок {e}')
+
+            self.tree.add_command(new_capt_command)
+
+            setup_static_commands(self)
+            setup_bot_events(self)
+            setup_server_events(self)
+
+            print("✅ Все команды и события зарегистрированы")
 
 def main():
     if not TOKEN:
@@ -46,14 +55,6 @@ def main():
         return
 
     bot = MyBot()
-
-    bot.tree.add_command(new_capt_command)
-
-
-    # Настройка команд и событий
-    setup_static_commands(bot)
-    setup_bot_events(bot)
-    setup_server_events(bot)
 
 
     print('🚀 Запуск бота...')
