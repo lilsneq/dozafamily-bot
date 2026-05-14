@@ -41,6 +41,7 @@ class MyBot(commands.Bot):
         except Exception as e:
             print(f'Ошибка проверки подписок {e}')
 
+        try:
             self.tree.add_command(new_capt_command)
 
             setup_static_commands(self)
@@ -48,6 +49,8 @@ class MyBot(commands.Bot):
             setup_server_events(self)
 
             print("✅ Все команды и события зарегистрированы")
+        except Exception as e:
+            print(f'Ошибка запуска команд {e}')
 
 def main():
     if not TOKEN:
