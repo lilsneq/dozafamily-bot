@@ -1,10 +1,13 @@
 """События бота"""
 import asyncio
 
-from config.settings import PANEL_CHANNEL_ID, RULES_CHANNEL_ID, AFK_CHANNEL_ID, SUBSCRIPTION_CHANNEL_ID, CAPT_CHANNEL_ID
-from models.application_button import ApplicationButton, AFKApplicationButton
+from config.settings import (PANEL_CHANNEL_ID, RULES_CHANNEL_ID,
+                             AFK_CHANNEL_ID, SUBSCRIPTION_CHANNEL_ID,
+                             CAPT_CHANNEL_ID, CHANNEL_FOR_CAPT)
+
+from models.application_button import ApplicationButton, AFKApplicationButton, CaptPanelButtons
 from models.rules_button import RulesButton
-from utils.storage import load_applications
+from utils.storage import load_applications, start_new_capt_id
 from utils.logger import send_log
 import discord
 from models.capt_button import CaptApplicationButton
@@ -147,17 +150,62 @@ def setup_bot_events(bot):
 
 
         #ЧАТ КАПТОВ
-        capt_channel = bot.get_channel(CAPT_CHANNEL_ID)
-        if capt_channel:
-            await capt_channel.purge(check=lambda m: m.author == bot.user)
+        try:
+            capt_channel = bot.get_channel(CAPT_CHANNEL_ID)
 
-            emb = discord.Embed(title=' Создание чата для откатов', color=discord.Color.red())
-            file = discord.File("assets/rules.jpg", filename="rules.jpg")
-            emb.set_image(url="attachment://rules.jpg")
+            if capt_channel:
+                await capt_channel.purge(check=lambda m: m.author == bot.user)
 
-            await capt_channel.send(file=file, embed=emb, view=CaptApplicationButton())
-            bot.add_view(CaptApplicationButton())
-            print(f'Панель откатов создана в {capt_channel.name}')
+                emb = discord.Embed(title=' Создание чата для откатов', color=discord.Color.red())
+                file = discord.File("assets/rules.jpg", filename="rules.jpg")
+                emb.set_image(url="attachment://rules.jpg")
+
+                await capt_channel.send(file=file, embed=emb, view=CaptApplicationButton())
+                bot.add_view(CaptApplicationButton())
+                print(f'Панель откатов создана в {capt_channel.name}')
+
+                # Лог о создании панели
+                await send_log(
+                    guild,
+                    f'🔧 **Панель заявок автоматически создана**\nМодератор: Автоматически\nКанал: {capt_channel.mention}',
+                    discord.Color.blue())
+
+        except Exception as e:
+            print(f'Ошибка при работе с каналом панели: {e}')
+
+
+
+        #ПАНЕЛЬ ДЛЯ ПРИНЯТИЯ КАПТА
+        try:
+            capt_panel_channel = guild.get_channel(CHANNEL_FOR_CAPT)
+
+            new_id = start_new_capt_id()
+
+            capt_embed = discord.Embed(
+                title=f'👳🏿‍♀️ЗАЯВКА НА КАПТ №{new_id}',
+                description='НАЖМИТЕ НА ПРИНЯТЬ ЕСЛИ ВЫ ХОТИТЕ УЧАСТВОВАТЬ В КАПТЕ\n' 
+                            'НАЖМИТЕ НА УДАЛИТЬ ЕСЛИ ХОТИТЕ ЧТОБЫ ВСЕ УЧАСТНИКИ УДАЛИЛИСЬ\n'
+                            '/new_capt создание новой панели',
+                color=discord.Color.red()
+            )
+
+            view = CaptPanelButtons()
+
+            await capt_panel_channel.send(embed=capt_embed, view=view)
+
+            print(f'Панель заявок на КАПТ создана в канале {capt_panel_channel.name}')
+
+            # Лог о создании панели
+            await send_log(
+                guild,
+                f'🔧 **Панель заявок автоматически создана**\nМодератор: Автоматически\nКанал: {capt_panel_channel.mention}',
+                discord.Color.blue()
+            )
+
+        except Exception as e:
+            print(f'Ошибка при работе с каналом панели: {e}')
+
+
 
 
         # Логирование запуска
@@ -167,5 +215,28 @@ def setup_bot_events(bot):
                 f'✅ **Бот запущен**\nБот {bot.user.mention} успешно запущен и готов к работе!',
                 discord.Color.green()
             )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
