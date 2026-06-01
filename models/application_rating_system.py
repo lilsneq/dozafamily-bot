@@ -16,13 +16,12 @@ from config.settings import RATING_CHANNEL_ID, ADMIN_RATING_CHANNEL_ID
 class RatingDrop(discord.ui.Select):
     def __init__(self):
         options = [
-            discord.SelectOption(label="ACADEMY", value="1236152539968438312:1", description="Подать заявку Academy", emoji="🟢"),
-            discord.SelectOption(label="Recruit", value="1482962712844828713:2", description="Подать заявку Recruit", emoji="🔵"),
-            discord.SelectOption(label="Sora", value="1482962888762069192:3", description="Подать заявку Sora", emoji="⚫"),
-            discord.SelectOption(label="Main Sora", value="1508432058865684671:4", description="Подать заявку Main Sora", emoji="🔴"),
-            discord.SelectOption(label="Chif rec", value="1509926246505779270:5", description="Подать заявку Chif rec", emoji="🟢"),
-            discord.SelectOption(label="High", value="1487937197142179880:6", description="Подать заявку High", emoji="🔵"),
-            discord.SelectOption(label="Dep", value="1487937119853744358:7", description="Подать заявку Dep", emoji="🔴"),
+            discord.SelectOption(label="Recruit", value="1482962712844828713:1", description="Подать заявку Recruit", emoji="🔵"),
+            discord.SelectOption(label="Sora", value="1482962888762069192:2", description="Подать заявку Sora", emoji="⚫"),
+            discord.SelectOption(label="Main Sora", value="1508432058865684671:3", description="Подать заявку Main Sora", emoji="🔴"),
+            discord.SelectOption(label="Chif rec", value="1509926246505779270:4", description="Подать заявку Chif rec", emoji="🟢"),
+            discord.SelectOption(label="High", value="1487937197142179880:5", description="Подать заявку High", emoji="🔵"),
+            discord.SelectOption(label="Dep", value="1487937119853744358:6", description="Подать заявку Dep", emoji="🔴"),
         ]
 
         super().__init__(
@@ -70,7 +69,6 @@ class RatingSystemApplication(discord.ui.View):
                 color=discord.Color.green()
             )
             admin_embed.add_field(name="Пользователь", value=interaction.user.mention, inline=True)
-            admin_embed.add_field(name="Желаемый номер", value=f"Номер {number}", inline=True)
             admin_embed.add_field(name="Запрашиваемая роль", value=role.mention, inline=False)
             admin_embed.set_footer(text=f"User ID: {interaction.user.id} | Role ID: {role.id}")
 
@@ -90,6 +88,15 @@ class AdminAcceptRatingSystem(discord.ui.View):
     """ПАНЕЛЬ ОДОБРИТЬ/ОТКЛОНИТЬ У АДМИНА"""
     def __init__(self):
         super().__init__(timeout=None)
+
+        self.all_rating_roles = [
+            1482962712844828713,
+            1482962888762069192,
+            1508432058865684671,
+            1509926246505779270,
+            1487937197142179880,
+            1487937119853744358
+        ]
 
 
     @discord.ui.button(label='Одобрить', style=discord.ButtonStyle.green, custom_id="admin_aprove")
@@ -121,11 +128,20 @@ class AdminAcceptRatingSystem(discord.ui.View):
         role = guild.get_role(role_id)
 
         if not member or not role:
-            await interaction.response.send_message(" Пользователь или роль больше не найдены на сервере.",
-                        ephemeral=True)
+            await interaction.response.send_message(" Пользователь или роль больше не найдены на сервере.", ephemeral=True)
             return
 
         try:
+            roles_to_remove = []
+            for r_id in self.all_rating_roles:
+                old_role = guild.get_role(r_id)
+                if old_role and old_role in member.roles and r_id != role_id:
+                    roles_to_remove.append(old_role)
+
+            if roles_to_remove:
+                await member.remove_roles(*roles_to_remove)
+                logging.info(f"Удалены старые роли номеров ({len(roles_to_remove)} шт.) у пользователя {member.name}")
+
             await member.add_roles(role)
 
             embed.color = discord.Color.brand_green()
