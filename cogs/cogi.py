@@ -1,5 +1,7 @@
 import discord
+import logging
 from discord import app_commands
+
 
 # Импортируем настройки и функции работы с JSON из ваших модулей
 from config.settings import CHANNEL_FOR_CAPT
@@ -22,8 +24,6 @@ async def new_capt_command(interaction: discord.Interaction):
         return
 
     try:
-
-
 
         capt_embed = discord.Embed(
             title=f'👳🏿‍♀️ ЗАЯВКА НА КАПТ №{new_id}',
@@ -57,5 +57,5 @@ async def new_capt_command(interaction: discord.Interaction):
             ephemeral=True
         )
     except Exception as e:
-        print(f"Ошибка при выполнении команды /new_capt: {e}")
+        logging.error(f"Ошибка при выполнении команды /new_capt: {e}")
         await interaction.followup.send(f"❌ Системная ошибка при создании панели: {e}", ephemeral=True)
