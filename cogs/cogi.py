@@ -59,3 +59,6 @@ async def new_capt_command(interaction: discord.Interaction):
     except Exception as e:
         logging.error(f"Ошибка при выполнении команды /new_capt: {e}")
         await interaction.followup.send(f"❌ Системная ошибка при создании панели: {e}", ephemeral=True)
+
+
+
