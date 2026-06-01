@@ -19,9 +19,9 @@ class RatingDrop(discord.ui.Select):
             discord.SelectOption(label="Recruit", value="1482962712844828713:1", description="Подать заявку Recruit", emoji="🔵"),
             discord.SelectOption(label="Sora", value="1482962888762069192:2", description="Подать заявку Sora", emoji="⚫"),
             discord.SelectOption(label="Main Sora", value="1508432058865684671:3", description="Подать заявку Main Sora", emoji="🔴"),
-            discord.SelectOption(label="Chif rec", value="1509926246505779270:4", description="Подать заявку Chif rec", emoji="🟢"),
-            discord.SelectOption(label="High", value="1487937197142179880:5", description="Подать заявку High", emoji="🔵"),
-            discord.SelectOption(label="Dep", value="1487937119853744358:6", description="Подать заявку Dep", emoji="🔴"),
+            # discord.SelectOption(label="Chif rec", value="1509926246505779270:4", description="Подать заявку Chif rec", emoji="🟢"),
+            # discord.SelectOption(label="High", value="1487937197142179880:5", description="Подать заявку High", emoji="🔵"),
+            # discord.SelectOption(label="Dep", value="1487937119853744358:6", description="Подать заявку Dep", emoji="🔴"),
         ]
 
         super().__init__(
