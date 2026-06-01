@@ -62,10 +62,15 @@ async def main():
         logging.warning('ОШИБКА ЗАПУСКА БОТА', exc_info=True)
         return
 
-    logging.info("✅ БОТ В РАБОТЕ.")
 
     async with bot:
-        await bot.start(TOKEN)
+        try:
+            logging.info("✅ БОТ В РАБОТЕ.")
+            await bot.start(TOKEN)
+        finally:
+            await bot.close()
+            logging.info('❌ БОТ УСПЕШНО ОТКЛЮЧËН')
+
 
 
 
