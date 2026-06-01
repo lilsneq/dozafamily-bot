@@ -295,17 +295,20 @@ class BotInit:
 
                     logging.info(f'Удалено {deleted} сообщений из канала выдачи ролей')
 
-
+                #кнопки
                 rating_embed = discord.Embed(
                     title=f'💣ЗАЯВКА НА ПОВЫШЕНИЕ',
                     description='ВЫБЕРИТЕ РОЛЬ ДЛЯ ПОВЫШЕНИЯ.\n'
                                 'ВАША ЗАЯВКА БУДЕТ РАССМОТРЕНА И ПРИНЯТА АДМИНИСТРАЦИЕЙ.',
-                    color=discord.Color.pink()
+                    color=discord.Color.red()
                 )
+                rating_embed.set_image(url="attachment://rules.jpg")
 
                 view = RatingSystemApplication()
+                file = discord.File("assets/rules.jpg", filename="rules.jpg")
 
-                await rating_role_channel.send(embed=rating_embed, view=view)
+                #отправка кнопок в чат
+                await rating_role_channel.send(file=file, embed=rating_embed, view=view)
                 logging.info(f'ПАНЕЛЬ ЗАЯВОК НА КАПТ СОЗДАНА В КАНАЛЕ {rating_role_channel.name}')
 
                 await send_log(
