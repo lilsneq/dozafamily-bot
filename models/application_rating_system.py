@@ -4,9 +4,8 @@ import logging
 # ИМПОРТЫ
 
 import discord
-from discord.app_commands import guilds
 
-from config.settings import RATING_CHANNEL_ID, ADMIN_RATING_CHANNEL_ID
+from config.settings import ADMIN_RATING_CHANNEL_ID
 
 
 
@@ -19,9 +18,6 @@ class RatingDrop(discord.ui.Select):
             discord.SelectOption(label="Recruit", value="1482962712844828713:1", description="Подать заявку Recruit", emoji="🔵"),
             discord.SelectOption(label="Sora", value="1482962888762069192:2", description="Подать заявку Sora", emoji="⚫"),
             discord.SelectOption(label="Main Sora", value="1508432058865684671:3", description="Подать заявку Main Sora", emoji="🔴"),
-            # discord.SelectOption(label="Chif rec", value="1509926246505779270:4", description="Подать заявку Chif rec", emoji="🟢"),
-            # discord.SelectOption(label="High", value="1487937197142179880:5", description="Подать заявку High", emoji="🔵"),
-            # discord.SelectOption(label="Dep", value="1487937119853744358:6", description="Подать заявку Dep", emoji="🔴"),
         ]
 
         super().__init__(
@@ -103,7 +99,7 @@ class AdminAcceptRatingSystem(discord.ui.View):
 
 
     @discord.ui.button(label='Одобрить', style=discord.ButtonStyle.green, custom_id="admin_aprove")
-    async def button_admin_aprove(self, interaction: discord.Interaction):
+    async def button_admin_aprove(self, interaction: discord.Interaction, button: discord.ui.Button):
         guild = interaction.guild
 
         if not interaction.message.embeds:
