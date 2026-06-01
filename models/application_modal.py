@@ -75,11 +75,11 @@ class FamilyApplicationModal(discord.ui.Modal, title='Форма заявки'):
             color=discord.Color.gold(),
             timestamp=datetime.utcnow()
         )
-        embed.add_field(name='👤 Имя и Фамилия', value=self.full_name.value, inline=False)
-        embed.add_field(name='Ваш возраст', value=self.age_user.value, inline=False)
-        embed.add_field(name='🆔 Номер паспорта', value=self.passport.value, inline=False)
-        embed.add_field(name='💼 Чем будет полезен', value=self.usefulness.value, inline=False)
-        embed.add_field(name='🎮 OOC Имя', value=self.ooc_name.value, inline=False)
+        embed.add_field(name=' Имя и Фамилия', value=self.full_name.value, inline=False)
+        embed.add_field(name=' Ваш возраст', value=self.age_user.value, inline=False)
+        embed.add_field(name=' Статик', value=self.passport.value, inline=False)
+        embed.add_field(name=' Чем будет полезен', value=self.usefulness.value, inline=False)
+        embed.add_field(name=' OOC Имя', value=self.ooc_name.value, inline=False)
         embed.set_footer(text=f'Заявка от {interaction.user.name}', icon_url=interaction.user.display_avatar.url)
         
         static_id = interaction.guild.get_channel(STATIC_CHANNEL_ID)

@@ -48,7 +48,7 @@ class AFKApplicationButton(discord.ui.View):
 
 
 class ApplicationReviewView(discord.ui.View):
-    """Кнопки под заявкой в админ-канале (Общие для всех типов)"""
+    """Кнопки под заявкой в админ-канале"""
 
     def __init__(self, applicant: discord.Member, app_id: int, is_afk: bool = False):
         super().__init__(timeout=None)
@@ -59,6 +59,7 @@ class ApplicationReviewView(discord.ui.View):
     @discord.ui.button(label="Принять", style=discord.ButtonStyle.green, custom_id="approve_btn")
     async def approve(self, interaction: discord.Interaction, button: discord.ui.Button):
         from utils.role_manager import give_accepted_roles, give_afk_role
+
         await remove_applicant_role(interaction.user)
 
 
@@ -92,7 +93,7 @@ class ApplicationReviewView(discord.ui.View):
         await interaction.message.edit(view=None)
 
         try:
-            await self.applicant.send(f"😔 К сожалению, ваша заявка {subject} была отклонена.")
+            await self.applicant.send(f" К сожалению, ваша заявка {subject} была отклонена.")
         except:
             pass
 
