@@ -209,7 +209,5 @@ class AFKApplicationReviewView(discord.ui.Modal, title='Форма заявки 
         )
 
 
-class ApplicationCaptData(discord.ui.View):
-    """Кнопка для подачи заявки на капт"""
-    pass
+
 
