@@ -50,15 +50,23 @@ class AFKApplicationButton(discord.ui.View):
 class ApplicationReviewView(discord.ui.View):
     """Кнопки под заявкой в админ-канале"""
 
+
     def __init__(self, applicant: discord.Member, app_id: int, is_afk: bool = False):
         super().__init__(timeout=None)
         self.applicant = applicant
         self.app_id = app_id
         self.is_afk = is_afk  # Флаг: AFK это или обычная заявка
 
+
+
     @discord.ui.button(label="Принять", style=discord.ButtonStyle.green, custom_id="approve_btn")
     async def approve(self, interaction: discord.Interaction, button: discord.ui.Button):
         from utils.role_manager import give_accepted_roles, give_afk_role
+
+        # кнопка нажимается только если ты админ
+        if not interaction.user.guild_permissions.administrator:
+            await interaction.response.send_message("❌ Эта кнопка доступна только администраторам.", ephemeral=True)
+            return
 
         await remove_applicant_role(interaction.user)
 
@@ -86,6 +94,10 @@ class ApplicationReviewView(discord.ui.View):
 
     @discord.ui.button(label="Отклонить", style=discord.ButtonStyle.red, custom_id="deny_btn")
     async def deny(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if not interaction.user.guild_permissions.administrator:
+            await interaction.response.send_message("❌ Эта кнопка доступна только администраторам.", ephemeral=True)
+            return
+
         subject = "на AFK" if self.is_afk else "в семью"
 
         await interaction.response.send_message(f"❌ Заявка отклонена.", ephemeral=True)
