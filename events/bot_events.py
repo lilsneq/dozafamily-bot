@@ -209,7 +209,7 @@ def setup_bot_events(bot):
 
         for g in bot.guilds:
             try:
-                rating_role_channel = guild.get_channel(RATING_CHANNEL_ID)
+                rating_role_channel = g.get_channel(RATING_CHANNEL_ID)
                 if rating_role_channel:
                     # Удаление всех сообщений в канале
                     deleted = 0

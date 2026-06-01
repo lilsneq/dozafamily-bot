@@ -55,6 +55,7 @@ class RatingSystemApplication(discord.ui.View):
                 ephemeral=True,
             )
             return
+
         if role in interaction.user.roles:
             await interaction.response.send_message(
                 f'У вас уже есть роль {role.name}',
@@ -70,7 +71,7 @@ class RatingSystemApplication(discord.ui.View):
             )
             admin_embed.add_field(name="Пользователь", value=interaction.user.mention, inline=True)
             admin_embed.add_field(name="Запрашиваемая роль", value=role.mention, inline=False)
-            admin_embed.set_footer(text=f"User ID: {interaction.user.id} | Role ID: {role.id}")
+            admin_embed.set_footer(text=f"User ID: {interaction.user.id}")
 
             await admin_ch.send(embed=admin_embed, view=AdminAcceptRatingSystem())
 
