@@ -71,7 +71,7 @@ class RatingSystemApplication(discord.ui.View):
             )
             admin_embed.add_field(name="Пользователь", value=interaction.user.mention, inline=True)
             admin_embed.add_field(name="Запрашиваемая роль", value=role.mention, inline=False)
-            admin_embed.set_footer(text=f"User ID: {interaction.user.id}")
+            admin_embed.set_footer(text=f"User ID: {interaction.user.id}|Role:{role.id}")
 
             await admin_ch.send(embed=admin_embed, view=AdminAcceptRatingSystem())
 
@@ -100,8 +100,10 @@ class AdminAcceptRatingSystem(discord.ui.View):
         ]
 
 
+
+
     @discord.ui.button(label='Одобрить', style=discord.ButtonStyle.green, custom_id="admin_aprove")
-    async def button_admin_aprove(self, interaction: discord.Interaction, button: discord.ui.Button):
+    async def button_admin_aprove(self, interaction: discord.Interaction):
         guild = interaction.guild
 
         if not interaction.message.embeds:
@@ -110,14 +112,9 @@ class AdminAcceptRatingSystem(discord.ui.View):
         embed = interaction.message.embeds[0]
 
         try:
-            footer_text = embed.footer.text
-            parts = footer_text.split("|")
-
-            user_part = parts[0].split(":")
-            user_id = int(user_part[1].strip())
-
-            role_part = parts[1].split(":")
-            role_id = int(role_part[1].strip())
+            parts = embed.footer.text.split("|")
+            user_id= int(parts[0].split(":")[1])
+            role_id = int(parts[1].split(":")[1])
 
         except Exception:
             logging.error(f"Не удалось распарсить эмбед")
@@ -126,6 +123,9 @@ class AdminAcceptRatingSystem(discord.ui.View):
             return
 
         member = guild.get_member(user_id)
+        if not member:
+            member = await guild.fetch_member(user_id)
+
         role = guild.get_role(role_id)
 
         if not member or not role:
@@ -148,8 +148,7 @@ class AdminAcceptRatingSystem(discord.ui.View):
             embed.color = discord.Color.brand_green()
             embed.title = f"Заявка одобрена администратором {interaction.user.display_name}"
 
-            await interaction.message.edit(embed=embed, view=None)
-            await interaction.response.defer()
+            await interaction.response.edit_message(embed=embed, view=None)
 
         except Exception:
             logging.error('Ошибка одобрения роли')
@@ -157,18 +156,20 @@ class AdminAcceptRatingSystem(discord.ui.View):
 
     @discord.ui.button(label="Отклонить", style=discord.ButtonStyle.red, custom_id="admin_deny")
     async def deny(self, interaction: discord.Interaction, button: discord.ui.Button):
+        guild = interaction.guild
+
         if not interaction.message.embeds:
             return
         embed = interaction.message.embeds[0]
 
         try:
-            footer_text = embed.footer.text
-            parts = footer_text.split("|")
-
-            user_part = parts[0].split(":")
-            user_id = int(user_part[1].strip())
+            parts = embed.footer.text.split("|")
+            user_id = int(parts[0].split(":")[1])
 
             member = interaction.guild.get_member(user_id)
+            if not member:
+                member = await guild.fetch_member(user_id)
+
         except Exception as e:
             logging.error(f'ОШИБКА КНОПКИ ОТКЛОНИТЬ: {e}')
             member = None
@@ -176,8 +177,8 @@ class AdminAcceptRatingSystem(discord.ui.View):
         embed.color = discord.Color.red()
         embed.title = f"Заявка отклонена администратором {interaction.user.display_name}"
 
-        await interaction.message.edit(embed=embed, view=None)
-        await interaction.response.defer()
+        await interaction.response.edit_message(embed=embed, view=None)
+
         if member:
             logging.info(f"Администратор {interaction.user.name} отклонил заявку пользователя {member.name}")
 
