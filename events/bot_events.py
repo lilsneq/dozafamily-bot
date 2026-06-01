@@ -1,11 +1,13 @@
 """События бота"""
 import asyncio
+import logging
 
 from config.settings import (PANEL_CHANNEL_ID, RULES_CHANNEL_ID,
                              AFK_CHANNEL_ID, SUBSCRIPTION_CHANNEL_ID,
-                             CAPT_CHANNEL_ID, CHANNEL_FOR_CAPT)
+                             CAPT_CHANNEL_ID, CHANNEL_FOR_CAPT, RATING_CHANNEL_ID)
 
 from models.application_button import ApplicationButton, AFKApplicationButton, CaptPanelButtons
+from models.application_rating_system import RatingSystemApplication
 from models.rules_button import RulesButton
 from utils.storage import load_applications, start_new_capt_id
 from utils.logger import send_log
@@ -205,8 +207,42 @@ def setup_bot_events(bot):
         except Exception as e:
             print(f'Ошибка при работе с каналом панели: {e}')
 
+        for g in bot.guilds:
+            try:
+                rating_role_channel = guild.get_channel(RATING_CHANNEL_ID)
+                if rating_role_channel:
+                    # Удаление всех сообщений в канале
+                    deleted = 0
+                    async for message in rating_role_channel.history(limit=None):
+                        try:
+                            await message.delete()
+                            deleted += 1
+                        except Exception as e:
+                            print(f'Не удалось удалить сообщение: {e}')
 
+                    print(f'Удалено {deleted} сообщений из канала выдачи ролей')
 
+                #панель
+                rating_embed = discord.Embed(
+                    title=f'💣ЗАЯВКА НА ПОВЫШЕНИЕ',
+                    description='ВЫБИРИТЕ РОЛЬ ДЛЯ ПОВЫШЕНИЯ\n'
+                                'ВЫША ЗАЯВКА БУДЕТ РАССМОТРЕНА И ПРИНЯТА АДМИНИСТРАЦИЕЙ СЕРВЕРА',
+                    color=discord.Color.pink()
+                )
+
+                view = RatingSystemApplication()
+
+                await rating_role_channel.send(embed=rating_embed, view=view)
+                logging.info(f'ПАНЕЛЬ ЗАЯВОК НА КАПТ СОЗДАНА В КАНАЛЕ {rating_role_channel.name}')
+
+                await send_log(
+                    guild,
+                    f'🔧 ** Панель заявок повышения автоматически создана**\nМодератором: Автоматически\nКанал: {rating_role_channel.mention}',
+                    discord.Color.blue()
+                )
+
+            except Exception as e:
+                print(f'Ошибка при работе с каналом панели: {e}')
 
         # Логирование запуска
         for guild in bot.guilds:
