@@ -252,17 +252,7 @@ class BotInit:
         for guild in self.bot.guilds:
             try:
                 capt_panel_channel = guild.get_channel(CHANNEL_FOR_CAPT)
-                if capt_panel_channel:
-                    # Удаление всех сообщений в канале
-                    deleted = 0
-                    async for message in capt_panel_channel.history(limit=None):
-                        try:
-                            await message.delete()
-                            deleted += 1
-                        except Exception:
-                            logging.error(f'Не удалось удалить сообщение', exc_info=True)
 
-                    logging.info(f'Удалено {deleted} сообщений из канала принятия капта')
                 new_id = start_new_capt_id()
 
                 capt_embed = discord.Embed(
