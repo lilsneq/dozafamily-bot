@@ -1,3 +1,5 @@
+import logging
+
 import discord
 from discord.ext import tasks, commands
 import json
@@ -45,7 +47,7 @@ class SubscriptionTasks(commands.Cog):
                     def is_bot(m): return m.author == self.bot.user
 
                     await channel.purge(limit=10, check=is_bot)
-                    print(f"🧹 Старые уведомления для {sub['user_name']} удалены, так как срок вышел.")
+                    logging.info(f"🧹 Старые уведомления для {sub['user_name']} удалены, так как срок вышел.")
                     continue
 
                 # подписка скоро закончится
