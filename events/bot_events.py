@@ -44,32 +44,40 @@ class BotInit:
 
     async def _sub_channel(self):
         """ЧАТ ПОДПИСКИ БОТА, в self передовать bot"""
-        try:
-            sub_channel = self.bot.get_channel(SUBSCRIPTION_CHANNEL_ID)
-            if sub_channel:
-                # Удаление всех сообщений в канале
-                deleted = 0
-                async for message in sub_channel.history(limit=None):
-                    try:
-                        await message.delete()
-                        deleted += 1
-                    except Exception:
-                        logging.error(f'Не удалось удалить сообщение', exc_info=True)
+        for guild in self.bot.guilds:
+            try:
+                sub_channel = self.bot.get_channel(SUBSCRIPTION_CHANNEL_ID)
+                if sub_channel:
+                    # Удаление всех сообщений в канале
+                    deleted = 0
+                    async for message in sub_channel.history(limit=None):
+                        try:
+                            await message.delete()
+                            deleted += 1
+                        except Exception:
+                            logging.error(f'Не удалось удалить сообщение', exc_info=True)
 
-                logging.info(f'Удалено {deleted} сообщений из канала подписки бота')
+                    logging.info(f'Удалено {deleted} сообщений из канала подписки бота')
 
-            if sub_channel:
-                await sub_channel.purge(check=lambda m: m.author == self.bot.user)
+                if sub_channel:
+                    await sub_channel.purge(check=lambda m: m.author == self.bot.user)
 
-                emb = discord.Embed(title='Кнопка подписки', color=discord.Color.red())
-                file = discord.File("assets/rules.jpg", filename="rules.jpg")
-                emb.set_image(url="attachment://rules.jpg")
+                    emb = discord.Embed(title='Кнопка подписки', color=discord.Color.red())
+                    file = discord.File("assets/rules.jpg", filename="rules.jpg")
+                    emb.set_image(url="attachment://rules.jpg")
 
-                await sub_channel.send(file=file, embed=emb, view=SubscriptionView())
-                self.bot.add_view(SubscriptionView())
-                logging.info(f'Панель пописки создана в {sub_channel.name}')
-        except Exception:
-            logging.error('ОШИБКА ЧАТА С ПОДПИСКОЙ', exc_info=True)
+                    await sub_channel.send(file=file, embed=emb, view=SubscriptionView())
+                    self.bot.add_view(SubscriptionView())
+                    logging.info(f'Панель пописки создана в {sub_channel.name}')
+
+                    await send_log(
+                        guild,
+                        f'🔧 ** Панель заявок повышения автоматически создана**\nМодератором: Автоматически\nКанал: {sub_channel.mention}',
+                        discord.Color.blue()
+                    )
+
+            except Exception:
+                logging.error('ОШИБКА ЧАТА С ПОДПИСКОЙ', exc_info=True)
 
     async def _command_sync(self):
         """СКОЛЬКО КОМАНД / БОТА СУЩЕСТВУЕТ, в self передовать bot"""
@@ -181,7 +189,7 @@ class BotInit:
                         try:
                             await message.delete()
                             deleted += 1
-                        except Exception as e:
+                        except Exception:
                             logging.error(f'Не удалось удалить сообщение', exc_info=True)
 
                     logging.info(f'Удалено {deleted} сообщений из канала правил')
@@ -193,14 +201,14 @@ class BotInit:
                     await RulesButton.send_rules(rules_channel)
                 logging.info(f'Панель правил запущена в {rules_channel.name}')
 
+                await send_log(
+                    guild,
+                    f'🔧 ** Панель заявок повышения автоматически создана**\nМодератором: Автоматически\nКанал: {rules_channel.mention}',
+                    discord.Color.blue()
+                )
+
             except Exception:
                 logging.error('Ошибка при отправке правил', exc_info=True)
-
-        await send_log(
-            guild,
-            f'🔧 ** Панель заявок повышения автоматически создана**\nМодератором: Автоматически\nКанал: {rating_role_channel.mention}',
-            discord.Color.blue()
-        )
 
     async def _rollback_channel_app(self):
         """ЧАТ ОТКАТОВ, в self передовать bot"""
