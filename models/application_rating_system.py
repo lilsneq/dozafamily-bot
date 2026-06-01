@@ -16,21 +16,15 @@ from config.settings import RATING_CHANNEL_ID, ADMIN_RATING_CHANNEL_ID
 class RatingDrop(discord.ui.Select):
     def __init__(self):
         options = [
-            discord.SelectOption(label="ACADEMY", value="1236152539968438312:1", description="Подать заявку на Номер 1",
-                                 emoji="🟢"),
-            discord.SelectOption(label="Recruit", value="1482962712844828713:2", description="Подать заявку на Номер 2",
-                                 emoji="🔵"),
-            discord.SelectOption(label="Sora", value="1482962888762069192:3", description="Подать заявку на Номер 3",
-                                 emoji="⚫"),
-            discord.SelectOption(label="Main Sora", value="1508432058865684671:4",
-                                 description="Подать заявку на Номер 4", emoji="🔴"),
-            discord.SelectOption(label="Chif rec", value="1509926246505779270:5",
-                                 description="Подать заявку на Номер 5", emoji="🟢"),
-            discord.SelectOption(label="High", value="1487937197142179880:6", description="Подать заявку на Номер 6",
-                                 emoji="🔵"),
-            discord.SelectOption(label="Dep", value="1487937119853744358:7", description="Подать заявку на Номер 7",
-                                 emoji="🔴"),
+            discord.SelectOption(label="ACADEMY", value="1236152539968438312:1", description="Подать заявку Academy", emoji="🟢"),
+            discord.SelectOption(label="Recruit", value="1482962712844828713:2", description="Подать заявку Recruit", emoji="🔵"),
+            discord.SelectOption(label="Sora", value="1482962888762069192:3", description="Подать заявку Sora", emoji="⚫"),
+            discord.SelectOption(label="Main Sora", value="1508432058865684671:4", description="Подать заявку Main Sora", emoji="🔴"),
+            discord.SelectOption(label="Chif rec", value="1509926246505779270:5", description="Подать заявку Chif rec", emoji="🟢"),
+            discord.SelectOption(label="High", value="1487937197142179880:6", description="Подать заявку High", emoji="🔵"),
+            discord.SelectOption(label="Dep", value="1487937119853744358:7", description="Подать заявку Dep", emoji="🔴"),
         ]
+
         super().__init__(
             placeholder="Выберите желаемый номер для повышения...",
             min_values=1,
@@ -78,9 +72,7 @@ class RatingSystemApplication(discord.ui.View):
             admin_embed.add_field(name="Пользователь", value=interaction.user.mention, inline=True)
             admin_embed.add_field(name="Желаемый номер", value=f"Номер {number}", inline=True)
             admin_embed.add_field(name="Запрашиваемая роль", value=role.mention, inline=False)
-            admin_embed.set_footer(text=f"ID пользователя: {interaction.user.id}")
-
-
+            admin_embed.set_footer(text=f"User ID: {interaction.user.id} | Role ID: {role.id}")
 
             await admin_ch.send(embed=admin_embed, view=AdminAcceptRatingSystem())
 
@@ -111,10 +103,13 @@ class AdminAcceptRatingSystem(discord.ui.View):
 
         try:
             footer_text = embed.footer.text
-
             parts = footer_text.split("|")
-            user_id = int(parts[0].split(": ")[1].strip())
-            role_id = int(parts[1].split(": ")[1].strip())
+
+            user_part = parts[0].split(":")
+            user_id = int(user_part[1].strip())
+
+            role_part = parts[1].split(":")
+            role_id = int(role_part[1].strip())
 
         except Exception:
             logging.error(f"Не удалось распарсить эмбед")
@@ -148,17 +143,26 @@ class AdminAcceptRatingSystem(discord.ui.View):
         if not interaction.message.embeds:
             return
         embed = interaction.message.embeds[0]
+
         try:
-            user_id = int(embed.footer.text.split(": ")[1])
+            footer_text = embed.footer.text
+            parts = footer_text.split("|")
+
+            user_part = parts[0].split(":")
+            user_id = int(user_part[1].strip())
+
             member = interaction.guild.get_member(user_id)
-        except Exception:
-            logging.error('ОШИБКА КНОПКИ ОТКЛОНИТЬ')
+        except Exception as e:
+            logging.error(f'ОШИБКА КНОПКИ ОТКЛОНИТЬ: {e}')
+            member = None
 
         embed.color = discord.Color.red()
         embed.title = f"Заявка отклонена администратором {interaction.user.display_name}"
 
         await interaction.message.edit(embed=embed, view=None)
         await interaction.response.defer()
+        if member:
+            logging.info(f"Администратор {interaction.user.name} отклонил заявку пользователя {member.name}")
 
 
 
