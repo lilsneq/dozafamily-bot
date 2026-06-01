@@ -49,3 +49,4 @@ def setup_static_commands(bot):
             embed.set_thumbnail(url=user.display_avatar.url)
 
         await interaction.response.send_message(embed=embed, ephemeral=True)
+
