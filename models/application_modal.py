@@ -50,7 +50,7 @@ class FamilyApplicationModal(discord.ui.Modal, title='Форма заявки'):
 
     async def on_submit(self, interaction: discord.Interaction):
 
-        from models.application_button import ApplicationReviewView
+        from models.application_button import FamilyApplicationView
 
         app_id = get_next_app_id()
 
@@ -92,7 +92,7 @@ class FamilyApplicationModal(discord.ui.Modal, title='Форма заявки'):
         app_channel = interaction.guild.get_channel(APPLICATION_CHANNEL_ID)
         if app_channel:
             # ДОБАВЛЯЕМ ПАРАМЕТР is_afk=False
-            view = ApplicationReviewView(applicant=interaction.user, app_id=app_id, is_afk=False)
+            view = FamilyApplicationView(applicant=interaction.user)
 
             await app_channel.send(
                 content=f'{interaction.user.mention} подал заявку в семью!',
@@ -147,7 +147,7 @@ class AFKApplicationReviewView(discord.ui.Modal, title='Форма заявки 
 
     async def on_submit(self, interaction: discord.Interaction):
 
-        from models.application_button import ApplicationReviewView
+        from models.application_button import AfkApplicationView
 
         app_id = get_next_app_id()
 
@@ -184,7 +184,7 @@ class AFKApplicationReviewView(discord.ui.Modal, title='Форма заявки 
         # Отправка в канал заявок
         app_channel = interaction.guild.get_channel(AFK_PANEL_CHANNEL_ID)
         if app_channel:
-            view = ApplicationReviewView(applicant=interaction.user, app_id=app_id, is_afk=True)
+            view = AfkApplicationView(applicant=interaction.user)
 
             await app_channel.send(
                 content=f'📢 {interaction.user.mention} подал заявку на **Inactive**!',
