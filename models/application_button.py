@@ -12,9 +12,13 @@ from utils.storage import (
     is_capt_locked,
     set_capt_lock
 )
+from config.settings import DEP_ROLE_ID, HIGH_ROLE_ID, RECRUIT_ROLE_ID
 
 # ИСПРАВЛЕНИЕ ИМПОРТА: Добавили функции load_capt_data и save_capt_data, чтобы они не выдавали NameError
 from utils.storage import load_capt_participants, save_capt_participants, load_capt_data, save_capt_data
+
+
+
 
 
 class ApplicationButton(discord.ui.View):
@@ -49,7 +53,7 @@ class AFKApplicationButton(discord.ui.View):
 
 class ApplicationReviewView(discord.ui.View):
     """Кнопки под заявкой в админ-канале"""
-
+    ALLOWED_ROLE = [DEP_ROLE_ID, HIGH_ROLE_ID, RECRUIT_ROLE_ID]
 
     def __init__(self, applicant: discord.Member, app_id: int, is_afk: bool = False):
         super().__init__(timeout=None)
@@ -64,7 +68,8 @@ class ApplicationReviewView(discord.ui.View):
         from utils.role_manager import give_accepted_roles, give_afk_role
 
         # кнопка нажимается только если ты админ
-        if not interaction.user.guild_permissions.administrator:
+        has_allowed_roles = any(role.id in self.ALLOWED_ROLE for role in interaction.user.roles)
+        if not (interaction.user.guild_permissions.administrator or has_allowed_roles):
             await interaction.response.send_message("❌ Эта кнопка доступна только администраторам.", ephemeral=True)
             return
 
@@ -94,7 +99,8 @@ class ApplicationReviewView(discord.ui.View):
 
     @discord.ui.button(label="Отклонить", style=discord.ButtonStyle.red, custom_id="deny_btn")
     async def deny(self, interaction: discord.Interaction, button: discord.ui.Button):
-        if not interaction.user.guild_permissions.administrator:
+        has_allowed_roles = any(role.id in self.ALLOWED_ROLE for role in interaction.user.roles)
+        if not (interaction.user.guild_permissions.administrator or has_allowed_roles):
             await interaction.response.send_message("❌ Эта кнопка доступна только администраторам.", ephemeral=True)
             return
 
