@@ -8,6 +8,7 @@ applications = {}
 application_counter = 0
 
 
+
 def load_applications():
     """Загрузка заявок из файла"""
     global applications, application_counter

@@ -6,6 +6,7 @@ import logging
 import discord
 
 from config.settings import ADMIN_RATING_CHANNEL_ID
+from commands.static import get_user_static
 
 
 
@@ -61,12 +62,15 @@ class RatingSystemApplication(discord.ui.View):
 
         admin_ch = guild.get_channel(ADMIN_RATING_CHANNEL_ID)
         if admin_ch:
+            static_id = get_user_static(interaction.user.id)
+
             admin_embed = discord.Embed(
                 title='Заявка на повышение',
                 color=discord.Color.green()
             )
             admin_embed.add_field(name="Пользователь", value=interaction.user.mention, inline=True)
             admin_embed.add_field(name="Запрашиваемая роль", value=role.mention, inline=False)
+            admin_embed.add_field(name="Статик id", value=static_id, inline=False)
             admin_embed.set_footer(text=f"User ID: {interaction.user.id}|Role:{role.id}")
 
             await admin_ch.send(embed=admin_embed, view=AdminAcceptRatingSystem())
