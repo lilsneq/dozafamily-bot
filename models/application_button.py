@@ -115,6 +115,119 @@ class ApplicationReviewView(discord.ui.View):
         except:
             pass
 
+    @discord.ui.button(label="Обзвон", style=discord.ButtonStyle.grey, custom_id="call_btn")
+    async def call(self, interaction: discord.Interaction, button: discord.ui.Button):
+
+        has_allowed_roles = any(role.id in self.ALLOWED_ROLE for role in interaction.user.roles)
+        if not (interaction.user.guild_permissions.administrator or has_allowed_roles):
+            await interaction.response.send_message("❌ Эта кнопка доступна только администраторам.", ephemeral=True)
+            return
+
+
+class FamilyApplicationView(discord.ui.View):
+    def __init__(self, applicant):
+        super().__init__(timeout=None)
+        self.applicant = applicant
+        # Список ID разрешенных ролей
+        self.ALLOWED_ROLE = [DEP_ROLE_ID, HIGH_ROLE_ID, RECRUIT_ROLE_ID]
+
+    async def check_permissions(self, interaction: discord.Interaction) -> bool:
+        """Вспомогательный метод проверки прав"""
+        has_allowed_roles = any(role.id in self.ALLOWED_ROLE for role in interaction.user.roles)
+        if not (interaction.user.guild_permissions.administrator or has_allowed_roles):
+            await interaction.response.send_message("Эта кнопка доступна только администраторам.", ephemeral=True)
+            return False
+        return True
+
+    @discord.ui.button(label="Принять", style=discord.ButtonStyle.green, custom_id="fam_approve_btn")
+    async def approve(self, interaction: discord.Interaction, button: discord.ui.Button):
+        from utils.role_manager import give_accepted_roles, give_afk_role
+
+        if not await self.check_permissions(interaction): return
+
+        await remove_applicant_role(interaction.user)
+        success = await give_accepted_roles(self.applicant)
+
+        if success:
+            await interaction.response.send_message("Заявка одобрена. Роли семьи выданы.", ephemeral=True)
+            self.stop()
+            await interaction.message.edit(view=None)
+            try:
+                await self.applicant.send("Ваша заявка в семью была одобрена!")
+            except:
+                pass
+        else:
+            await interaction.response.send_message("Ошибка при выдаче ролей. Проверьте права бота.", ephemeral=True)
+
+    @discord.ui.button(label="Отклонить", style=discord.ButtonStyle.red, custom_id="fam_deny_btn")
+    async def deny(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if not await self.check_permissions(interaction): return
+
+        await interaction.response.send_message("Заявка в семью отклонена.", ephemeral=True)
+        self.stop()
+        await interaction.message.edit(view=None)
+        try:
+            await self.applicant.send("К сожалению, ваша заявка в семью была отклонена.")
+        except:
+            pass
+
+    @discord.ui.button(label="Обзвон", style=discord.ButtonStyle.grey, custom_id="fam_call_btn")
+    async def call(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if not await self.check_permissions(interaction): return
+
+        # Логика обзвона для семьи
+        await interaction.response.send_message(f"Начинаем процесс обзвона для {self.applicant.mention}...",
+                                                ephemeral=True)
+        try:
+            await self.applicant.send(f'Привет {self.applicant.mention}. Вас вызвали на обзвон, пожалуйста присоединитесь в свободный канал на сервере.')
+
+        except discord.Forbidden:
+            await interaction.response.send_message(f'Не удалось отправить сообщение {self.applicant.mention}.',
+                                                    ephemeral=True)
+
+class AfkApplicationView(discord.ui.View):
+    def __init__(self, applicant):
+        super().__init__(timeout=None)
+        self.applicant = applicant
+        self.ALLOWED_ROLE = [DEP_ROLE_ID, HIGH_ROLE_ID, RECRUIT_ROLE_ID]
+
+    async def check_permissions(self, interaction: discord.Interaction) -> bool:
+        has_allowed_roles = any(role.id in self.ALLOWED_ROLE for role in interaction.user.roles)
+        if not (interaction.user.guild_permissions.administrator or has_allowed_roles):
+            await interaction.response.send_message("❌ Эта кнопка доступна только администраторам.", ephemeral=True)
+            return False
+        return True
+
+    @discord.ui.button(label="Принять", style=discord.ButtonStyle.green, custom_id="afk_approve_btn")
+    async def approve(self, interaction: discord.Interaction, button: discord.ui.Button):
+        from utils.role_manager import give_afk_role
+
+        if not await self.check_permissions(interaction): return
+
+        success = await give_afk_role(self.applicant)
+
+        if success:
+            await interaction.response.send_message("✅ AFK-заявка одобрена. Роль AFK выдана.", ephemeral=True)
+            self.stop()
+            await interaction.message.edit(view=None)
+            try:
+                await self.applicant.send("🎉 Ваш запрос на AFK был одобрен!")
+            except: pass
+        else:
+            await interaction.response.send_message("❌ Ошибка при выдаче ролей. Проверьте права бота.", ephemeral=True)
+
+    @discord.ui.button(label="Отклонить", style=discord.ButtonStyle.red, custom_id="afk_deny_btn")
+    async def deny(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if not await self.check_permissions(interaction): return
+
+        await interaction.response.send_message("❌ AFK-заявка отклонена.", ephemeral=True)
+        self.stop()
+        await interaction.message.edit(view=None)
+        try:
+            await self.applicant.send(" К сожалению, ваша заявка на AFK была отклонена.")
+        except: pass
+
+
 
 class CaptPanelButtons(discord.ui.View):
     def __init__(self):
