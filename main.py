@@ -21,6 +21,7 @@ logging.getLogger("discord").setLevel(logging.WARNING)
 from discord.ext import commands
 from config.settings import TOKEN
 from commands.static import setup_static_commands
+from commands.joke import setup_joke_commands
 from events.bot_events import setup_bot_events
 from events.server_events import setup_server_events
 from cogs.cogi import new_capt_command
@@ -53,6 +54,7 @@ async def main():
     try:
         await bot.add_cog(SubscriptionTasks(bot))
         bot.tree.add_command(new_capt_command)
+        setup_joke_commands(bot)
         setup_static_commands(bot)
         setup_bot_events(bot)
         setup_server_events(bot)

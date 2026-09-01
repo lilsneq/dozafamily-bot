@@ -5,6 +5,7 @@ import json
 import os
 from config.settings import APPLICATIONS_FILE
 
+
 def load_applications_data():
     """Загрузка данных из applications.json"""
     try:
